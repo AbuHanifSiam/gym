@@ -1,4 +1,6 @@
-import { Schema, model, models, type Model } from 'mongoose';
+import mongoose, { type Model } from 'mongoose';
+
+const { Schema, model, models } = mongoose;
 
 export const LOCKOUT_WINDOW_SEC = 15 * 60;
 

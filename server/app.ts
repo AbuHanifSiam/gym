@@ -9,7 +9,9 @@ const routes: Route[] = [...healthRoutes, ...authRoutes];
 export async function handle(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Cache-Control', 'no-store');
   try {
-    const pathname = new URL(req.url ?? '/', 'http://x').pathname.replace(/^\/api/, '');
+    // vercel.json rewrites /api/<path> to /api?__path=<path>
+    const raw = req.query.__path;
+    const pathname = '/' + (Array.isArray(raw) ? raw.join('/') : (raw ?? ''));
     const { route, params } = matchRoute(routes, req.method ?? 'GET', pathname);
     if (!route.noDb) await connectDb();
     await route.handler(req, res, params);

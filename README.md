@@ -5,7 +5,7 @@ A mobile-first personal workout planner and logger. It's built with React (Vite,
 ## Project layout
 
 ```
-api/[...path].ts   Single Vercel function: forwards every /api/* request to server/app.ts
+api/index.ts       Single Vercel function: every /api/* request is rewritten here and routed to server/app.ts
 server/            API code: db connection (cached), auth, router, models, routes
 shared/            zod schemas and types used by both the API and the UI
 src/               React app (pages, components, data hooks)
