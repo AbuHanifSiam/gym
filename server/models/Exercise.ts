@@ -20,6 +20,15 @@ const variationSchema = new Schema(
   { _id: false },
 );
 
+const imageSchema = new Schema(
+  {
+    url: { type: String, required: true },
+    caption: { type: String, default: '' },
+    variationKey: { type: String, default: '' },
+  },
+  { _id: false },
+);
+
 const exerciseSchema = new Schema<ExerciseFields>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -31,7 +40,7 @@ const exerciseSchema = new Schema<ExerciseFields>(
     muscles: { type: [String], default: [] },
     steps: { type: [String], default: [] },
     variations: { type: [variationSchema], default: [] },
-    imageUrl: { type: String, default: '' },
+    images: { type: [imageSchema], default: [] },
     videoUrl: { type: String, default: '' },
     isSeed: { type: Boolean, default: false },
   },

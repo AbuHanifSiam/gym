@@ -3,7 +3,7 @@ import { exerciseInputSchema, type Exercise } from '../../shared/schemas.js';
 import { requireUserId } from '../auth.js';
 import { ApiError, parse, type Route } from '../http.js';
 import { ExerciseModel, type ExerciseFields } from '../models/Exercise.js';
-import { seedUserExercises } from '../seed/seedUser.js';
+import { backfillSeedImages, seedUserExercises } from '../seed/seedUser.js';
 
 type Lean = ExerciseFields & { _id: mongoose.Types.ObjectId };
 
@@ -23,7 +23,11 @@ export function toExercise(e: Lean): Exercise {
       description,
       works,
     })),
-    imageUrl: e.imageUrl,
+    images: (e.images ?? []).map(({ url, caption, variationKey }) => ({
+      url,
+      caption,
+      variationKey,
+    })),
     videoUrl: e.videoUrl,
     isSeed: e.isSeed,
     createdAt: e.createdAt.toISOString(),
@@ -56,6 +60,7 @@ export const exerciseRoutes: Route[] = [
     handler: async (req, res) => {
       const userId = requireUserId(req);
       const list = await ExerciseModel.find({ userId }).sort({ name: 1 }).lean<Lean[]>();
+      await backfillSeedImages(list);
       res.json({ exercises: list.map(toExercise) });
     },
   },

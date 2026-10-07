@@ -1,7 +1,65 @@
-import type { ExerciseInput } from '../../shared/schemas.js';
+import type { ExerciseImage, ExerciseInput } from '../../shared/schemas.js';
 
-type Seed = Omit<ExerciseInput, 'imageUrl' | 'videoUrl' | 'muscles' | 'steps' | 'variations'> &
+type Seed = Omit<ExerciseInput, 'images' | 'videoUrl' | 'muscles' | 'steps' | 'variations'> &
   Partial<Pick<ExerciseInput, 'muscles' | 'steps' | 'variations'>>;
+
+// Photos from free-exercise-db (public domain, https://github.com/yuhonas/free-exercise-db),
+// served via jsDelivr. Every entry there has a start (0.jpg) and end (1.jpg) position photo.
+const IMG_BASE = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises';
+
+function photos(id: string, label: string, variationKey = ''): ExerciseImage[] {
+  const prefix = label ? `${label}: ` : '';
+  return [
+    { url: `${IMG_BASE}/${id}/0.jpg`, caption: `${prefix}start position`, variationKey },
+    { url: `${IMG_BASE}/${id}/1.jpg`, caption: `${prefix}end position`, variationKey },
+  ];
+}
+
+export const seedImages: Record<string, ExerciseImage[]> = {
+  'Warm-up': [
+    ...photos('Walking_Treadmill', 'Walk'),
+    ...photos('Arm_Circles', 'Arm circles'),
+    ...photos('Bodyweight_Squat', 'Bodyweight squats'),
+  ],
+  Squats: photos('Bodyweight_Squat', ''),
+  'Push-ups': [
+    ...photos('Pushups', 'Standard', 'standard'),
+    ...photos('Incline_Push-Up', 'Hands on bench', 'incline'),
+  ],
+  'Pull-up practice': [
+    ...photos('Band_Assisted_Pull-Up', 'Assisted', 'assisted'),
+    ...photos('Pullups', 'Full pull-up (lower slowly)', 'negative'),
+  ],
+  'Dumbbell shoulder press': photos('Dumbbell_Shoulder_Press', ''),
+  'Dumbbell side raise': photos('Side_Lateral_Raise', ''),
+  'Dumbbell front raise': photos('Front_Dumbbell_Raise', ''),
+  'Back push-up': [
+    ...photos('Bench_Dips', 'Bench dips', 'bench-dips'),
+    ...photos('Hyperextensions_Back_Extensions', 'Back extension', 'back-extension'),
+  ],
+  'Dumbbell side bend': photos('Dumbbell_Side_Bend', ''),
+  'Lat pulldown': [
+    ...photos('Wide-Grip_Lat_Pulldown', 'Wide overhand', 'wide-overhand'),
+    ...photos('Close-Grip_Front_Lat_Pulldown', 'Shoulder-width overhand', 'shoulder-overhand'),
+    ...photos('Underhand_Cable_Pulldowns', 'Underhand', 'underhand'),
+    ...photos('V-Bar_Pulldown', 'Neutral V-handle', 'neutral-v'),
+    ...photos('One_Arm_Lat_Pulldown', 'One arm', 'one-arm'),
+  ],
+  'Seated cable row': [
+    ...photos('Seated_Cable_Rows', 'V-handle', 'v-handle'),
+    ...photos('Cable_Rope_Rear-Delt_Rows', 'Rope', 'rope'),
+  ],
+  'Lying leg raises': photos('Flat_Bench_Lying_Leg_Raise', ''),
+  Plank: photos('Plank', '')
+    .slice(0, 1)
+    .map((i) => ({ ...i, caption: 'Hold this position' })),
+  Stretching: [
+    ...photos('Quad_Stretch', 'Quads').slice(0, 1),
+    ...photos('Hamstring_Stretch', 'Hamstrings').slice(0, 1),
+    ...photos('Chest_And_Front_Of_Shoulder_Stretch', 'Chest & shoulders').slice(0, 1),
+    ...photos('Shoulder_Stretch', 'Shoulders').slice(0, 1),
+  ].map((i) => ({ ...i, caption: i.caption.replace(': start position', '') })),
+};
 
 // Default library from the project plan (section 7). Names are the identity used to avoid duplicates.
 export const seedExercises: Seed[] = [

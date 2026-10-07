@@ -59,3 +59,7 @@ Other scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`,
 - Login is rate-limited to 5 failed attempts per email and IP every 15 minutes. Attempts are stored in MongoDB and expire automatically through a TTL index.
 - All input is validated with zod. Errors use one format: `{ "error": { "code", "message", "fields?" } }`.
 - Secrets live only in environment variables. `.env*` files are git-ignored.
+
+## Credits
+
+Default exercise photos: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (public domain), served via jsDelivr.

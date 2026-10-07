@@ -67,3 +67,19 @@ describe('exercise validation', () => {
     );
   });
 });
+
+describe('seed images', () => {
+  it('only reference real exercises and grips', async () => {
+    const { seedExercises, seedImages } = await import('../server/seed/exercises.js');
+    for (const [name, images] of Object.entries(seedImages)) {
+      const ex = seedExercises.find((e) => e.name === name);
+      expect(ex, name).toBeDefined();
+      const keys = new Set((ex!.variations ?? []).map((v) => v.key));
+      for (const img of images) {
+        if (img.variationKey)
+          expect(keys.has(img.variationKey), `${name}: ${img.variationKey}`).toBe(true);
+      }
+      expect(() => parse(exerciseInputSchema, { ...ex, images })).not.toThrow();
+    }
+  });
+});

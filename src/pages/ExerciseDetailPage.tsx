@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDeleteExercise, useExercise } from '../api/exercises';
+import ImageGallery from '../components/ImageGallery';
 
 function youtubeEmbed(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/);
@@ -21,6 +22,13 @@ export default function ExerciseDetailPage() {
     );
 
   const embed = e.videoUrl ? youtubeEmbed(e.videoUrl) : null;
+  const variationKeys = new Set(e.variations.map((v) => v.key));
+  // Photos tied to a grip show under that grip; the rest go in the top gallery.
+  const generalImages = e.images.filter((i) => !variationKeys.has(i.variationKey));
+  const shown = generalImages.length ? generalImages : e.images;
+  const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(
+    `${e.name} proper form beginner`,
+  )}`;
 
   async function onDelete() {
     if (!confirm(`Delete "${e!.name}"? This can't be undone.`)) return;
@@ -53,14 +61,7 @@ export default function ExerciseDetailPage() {
         )}
       </header>
 
-      {e.imageUrl && (
-        <img
-          src={e.imageUrl}
-          alt={`${e.name} reference`}
-          className="w-full rounded-2xl"
-          loading="lazy"
-        />
-      )}
+      <ImageGallery images={shown} />
 
       {e.steps.length > 0 && (
         <section className="card">
@@ -82,11 +83,19 @@ export default function ExerciseDetailPage() {
                 <p className="font-medium">{v.name}</p>
                 {v.description && <p className="text-sm">{v.description}</p>}
                 {v.works && <p className="text-sm text-slate-500">Works: {v.works}</p>}
+                <ImageGallery
+                  images={e.images.filter((i) => i.variationKey === v.key)}
+                  size="small"
+                />
               </li>
             ))}
           </ul>
         </section>
       )}
+
+      <a href={youtubeSearch} target="_blank" rel="noreferrer" className="btn-ghost w-full">
+        ▶ Find form videos on YouTube
+      </a>
 
       {embed ? (
         <div className="aspect-video overflow-hidden rounded-2xl">

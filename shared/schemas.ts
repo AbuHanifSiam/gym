@@ -70,6 +70,19 @@ export const variationSchema = z.object({
 });
 export type Variation = z.infer<typeof variationSchema>;
 
+export const exerciseImageSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .min(1, 'Image URL is required')
+    .max(500)
+    .refine((v) => /^https?:\/\//i.test(v), 'Must start with http:// or https://'),
+  caption: z.string().trim().max(80).default(''),
+  /** Optional: the grip/variation this picture shows. Empty = general. */
+  variationKey: z.string().trim().max(40).default(''),
+});
+export type ExerciseImage = z.infer<typeof exerciseImageSchema>;
+
 export const exerciseInputSchema = z
   .object({
     name: z.string().trim().min(1, 'Name is required').max(80),
@@ -81,7 +94,7 @@ export const exerciseInputSchema = z
     muscles: z.array(z.string().trim().min(1).max(40)).max(15).default([]),
     steps: z.array(z.string().trim().min(1).max(300)).max(20).default([]),
     variations: z.array(variationSchema).max(12).default([]),
-    imageUrl: optionalUrl,
+    images: z.array(exerciseImageSchema).max(20).default([]),
     videoUrl: optionalUrl,
   })
   .refine((e) => new Set(e.variations.map((v) => v.key)).size === e.variations.length, {

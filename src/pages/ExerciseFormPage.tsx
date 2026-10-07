@@ -6,6 +6,7 @@ import {
   exerciseInputSchema,
   type Exercise,
   type ExerciseInput,
+  type ExerciseImage,
   type Variation,
 } from '../../shared/schemas';
 import { ApiError } from '../api/client';
@@ -20,7 +21,7 @@ interface FormState {
   muscles: string;
   steps: string;
   variations: Variation[];
-  imageUrl: string;
+  images: ExerciseImage[];
   videoUrl: string;
 }
 
@@ -34,7 +35,7 @@ function toForm(e?: Exercise): FormState {
     muscles: e?.muscles.join(', ') ?? '',
     steps: e?.steps.join('\n') ?? '',
     variations: e?.variations ?? [],
-    imageUrl: e?.imageUrl ?? '',
+    images: e?.images ?? [],
     videoUrl: e?.videoUrl ?? '',
   };
 }
@@ -66,6 +67,12 @@ function ExerciseForm({ existing }: { existing?: Exercise }) {
     set(
       'variations',
       f.variations.map((v, j) => (j === i ? { ...v, ...patch } : v)),
+    );
+
+  const setImg = (i: number, patch: Partial<ExerciseImage>) =>
+    set(
+      'images',
+      f.images.map((img, j) => (j === i ? { ...img, ...patch } : img)),
     );
 
   async function onSubmit(ev: FormEvent) {
@@ -248,15 +255,80 @@ function ExerciseForm({ existing }: { existing?: Exercise }) {
         </button>
       </fieldset>
 
-      <Field label="Image URL (optional)" id="imageUrl" error={errors.imageUrl}>
-        <input
-          id="imageUrl"
-          type="url"
-          className="input"
-          value={f.imageUrl}
-          onChange={(e) => set('imageUrl', e.target.value)}
-        />
-      </Field>
+      <fieldset className="space-y-3">
+        <legend className="mb-1 text-sm font-medium">Photos (start, end, other angles)</legend>
+        {f.images.map((img, i) => (
+          <div key={i} className="card flex gap-3">
+            {img.url ? (
+              <img
+                src={img.url}
+                alt=""
+                className="size-20 shrink-0 rounded-lg bg-white object-contain ring-1 ring-slate-200"
+              />
+            ) : (
+              <div className="size-20 shrink-0 rounded-lg bg-slate-100 dark:bg-slate-800" />
+            )}
+            <div className="min-w-0 flex-1 space-y-2">
+              <input
+                aria-label={`Photo ${i + 1} link`}
+                type="url"
+                className="input"
+                placeholder="https://… image link"
+                value={img.url}
+                onChange={(e) => setImg(i, { url: e.target.value })}
+              />
+              {errors[`images.${i}.url`] && (
+                <p className="text-sm text-red-600">{errors[`images.${i}.url`]}</p>
+              )}
+              <input
+                aria-label={`Photo ${i + 1} caption`}
+                className="input"
+                placeholder="Caption, e.g. Side view"
+                value={img.caption}
+                onChange={(e) => setImg(i, { caption: e.target.value })}
+              />
+              <div className="flex gap-2">
+                <select
+                  aria-label={`Photo ${i + 1} grip`}
+                  className="input"
+                  value={img.variationKey}
+                  onChange={(e) => setImg(i, { variationKey: e.target.value })}
+                >
+                  <option value="">All grips</option>
+                  {f.variations
+                    .filter((v) => v.key)
+                    .map((v) => (
+                      <option key={v.key} value={v.key}>
+                        {v.name}
+                      </option>
+                    ))}
+                </select>
+                <button
+                  type="button"
+                  className="btn-ghost shrink-0 px-4 text-red-600"
+                  aria-label={`Remove photo ${i + 1}`}
+                  onClick={() =>
+                    set(
+                      'images',
+                      f.images.filter((_, j) => j !== i),
+                    )
+                  }
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="btn-ghost w-full"
+          onClick={() => set('images', [...f.images, { url: '', caption: '', variationKey: '' }])}
+        >
+          + Add photo
+        </button>
+      </fieldset>
+
       <Field label="YouTube link (optional)" id="videoUrl" error={errors.videoUrl}>
         <input
           id="videoUrl"
