@@ -1,18 +1,21 @@
+import { lazy } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { useMe } from './api/auth';
 import Layout from './components/Layout';
 import AuthPage from './pages/AuthPage';
-import ExerciseDetailPage from './pages/ExerciseDetailPage';
-import ExerciseFormPage from './pages/ExerciseFormPage';
-import ExerciseProgressPage from './pages/ExerciseProgressPage';
-import ExercisesPage from './pages/ExercisesPage';
 import Placeholder from './pages/Placeholder';
-import PlanBuilderPage from './pages/PlanBuilderPage';
-import PlansPage from './pages/PlansPage';
-import ProgressPage from './pages/ProgressPage';
-import SessionDetailPage from './pages/SessionDetailPage';
-import SettingsPage from './pages/SettingsPage';
 import TodayPage from './pages/TodayPage';
+
+// Today and login load first; other screens (charts, drag-and-drop) load when opened.
+const ExerciseDetailPage = lazy(() => import('./pages/ExerciseDetailPage'));
+const ExerciseFormPage = lazy(() => import('./pages/ExerciseFormPage'));
+const ExercisesPage = lazy(() => import('./pages/ExercisesPage'));
+const PlanBuilderPage = lazy(() => import('./pages/PlanBuilderPage'));
+const PlansPage = lazy(() => import('./pages/PlansPage'));
+const ProgressPage = lazy(() => import('./pages/ProgressPage'));
+const SessionDetailPage = lazy(() => import('./pages/SessionDetailPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ExerciseProgressPage = lazy(() => import('./pages/ExerciseProgressPage'));
 
 function RequireAuth() {
   const { data: user, isPending, isError } = useMe();

@@ -19,6 +19,7 @@ import {
   useUpdateSettings,
 } from '../api/plans';
 import DayEditor from '../components/plan/DayEditor';
+import IntensityChip from '../components/IntensityChip';
 import { fromDraftDay, newUid, toDraftDay, type DraftDay } from '../components/plan/types';
 
 export default function PlanBuilderPage() {
@@ -308,18 +309,4 @@ function gripSummary(day: DraftDay, byId: Map<string, Exercise>): string {
     .filter(Boolean);
   const show = machineGrips.length ? machineGrips : grips;
   return show.length ? ` · ${[...new Set(show)].slice(0, 2).join(' / ')}` : '';
-}
-
-export function IntensityChip({ value }: { value: 'hard' | 'moderate' }) {
-  return (
-    <span
-      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold uppercase ${
-        value === 'hard'
-          ? 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200'
-          : 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200'
-      }`}
-    >
-      {value}
-    </span>
-  );
 }

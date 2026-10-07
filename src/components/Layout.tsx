@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import RestTimerBar from './today/RestTimerBar';
 
@@ -13,7 +14,9 @@ export default function Layout() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-xl flex-col">
       <main className="flex-1 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-28">
-        <Outlet />
+        <Suspense fallback={<p className="pt-8 text-center text-slate-500">Loading…</p>}>
+          <Outlet />
+        </Suspense>
       </main>
       <RestTimerBar />
       <nav

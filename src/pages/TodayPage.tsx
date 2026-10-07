@@ -10,7 +10,7 @@ import { kgToDisplay } from '../../shared/time';
 import { useMe } from '../api/auth';
 import { useToday } from '../api/today';
 import ExerciseCard from '../components/today/ExerciseCard';
-import { IntensityChip } from './PlanBuilderPage';
+import IntensityChip from '../components/IntensityChip';
 import { startRest, stopRest } from '../workout/restTimer';
 import {
   addSet,
