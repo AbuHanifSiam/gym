@@ -304,3 +304,40 @@ export interface TodayResponse {
   last: Record<string, LastPerformance>;
   session: WorkoutSession | null;
 }
+
+// ---------- Progress ----------
+
+export interface SessionSummary {
+  id: string;
+  date: string;
+  dayIndex: number;
+  planId: string | null;
+  startedAt: string;
+  finishedAt: string | null;
+  exercises: number;
+  doneSets: number;
+  totalSets: number;
+  volumeKg: number;
+}
+
+export interface SessionPage {
+  sessions: SessionSummary[];
+  /** Pass as ?before= to load the next page; null when there are no more. */
+  nextCursor: string | null;
+}
+
+export interface ExerciseProgress {
+  exercise: Exercise;
+  points: import('./progress.js').ExercisePoint[];
+  prs: import('./progress.js').ExercisePRs;
+}
+
+export interface ProgressSummary {
+  today: string;
+  month: string;
+  /** Date -> status for every day of the month. */
+  days: Record<string, import('./progress.js').DayStatus>;
+  streak: { current: number; best: number };
+  week: { done: number; planned: number; start: string };
+  totalWorkouts: number;
+}

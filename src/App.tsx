@@ -4,10 +4,13 @@ import Layout from './components/Layout';
 import AuthPage from './pages/AuthPage';
 import ExerciseDetailPage from './pages/ExerciseDetailPage';
 import ExerciseFormPage from './pages/ExerciseFormPage';
+import ExerciseProgressPage from './pages/ExerciseProgressPage';
 import ExercisesPage from './pages/ExercisesPage';
 import Placeholder from './pages/Placeholder';
 import PlanBuilderPage from './pages/PlanBuilderPage';
 import PlansPage from './pages/PlansPage';
+import ProgressPage from './pages/ProgressPage';
+import SessionDetailPage from './pages/SessionDetailPage';
 import SettingsPage from './pages/SettingsPage';
 import TodayPage from './pages/TodayPage';
 
@@ -46,7 +49,9 @@ export default function App() {
           <Route path="/exercises/new" element={<ExerciseFormPage />} />
           <Route path="/exercises/:id" element={<ExerciseDetailPage />} />
           <Route path="/exercises/:id/edit" element={<ExerciseFormPage />} />
-          <Route path="/progress" element={<Placeholder title="Progress" phase={5} />} />
+          <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/progress/exercise/:id" element={<ExerciseProgressPage />} />
+          <Route path="/progress/session/:id" element={<SessionDetailPage />} />
           <Route path="/body" element={<Placeholder title="Body log" phase={6} />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>

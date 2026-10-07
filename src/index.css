@@ -31,3 +31,17 @@
 @utility card {
   @apply rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800;
 }
+
+/* Chart tokens (validated: series color passes lightness band + 3:1 contrast in each mode) */
+:root {
+  --chart-series: #059669;
+  --chart-grid: #e2e8f0;
+  --chart-axis: #64748b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --chart-series: #0ea371;
+    --chart-grid: #1e293b;
+    --chart-axis: #94a3b8;
+  }
+}
