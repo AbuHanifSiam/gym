@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import RestTimerBar from './today/RestTimerBar';
 
 const tabs = [
   { to: '/', label: 'Today', icon: '🏋️', end: true },
@@ -14,6 +15,7 @@ export default function Layout() {
       <main className="flex-1 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-28">
         <Outlet />
       </main>
+      <RestTimerBar />
       <nav
         aria-label="Main"
         className="fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/95"

@@ -224,3 +224,83 @@ export function emptyWeek(): PlanDay[] {
     items: [],
   }));
 }
+
+// ---------- Workout sessions ----------
+
+export const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
+const isoDateTime = z.iso.datetime({ offset: true });
+
+export const sessionSetSchema = z.object({
+  setNumber: z.number().int().min(1).max(50),
+  /** Always stored in kg; null = bodyweight / not entered. */
+  weight: z.number().min(0).max(2000).nullable().default(null),
+  reps: z.number().int().min(0).max(1000).nullable().default(null),
+  durationSec: z.number().int().min(0).max(36000).nullable().default(null),
+  done: z.boolean().default(false),
+});
+export type SessionSet = z.infer<typeof sessionSetSchema>;
+
+export const sessionTargetSchema = z.object({
+  sets: z.number().int().min(0).max(50),
+  repsMin: z.number().int().min(0).max(1000).nullable().default(null),
+  repsMax: z.number().int().min(0).max(1000).nullable().default(null),
+  durationSec: z.number().int().min(0).max(36000).nullable().default(null),
+  notes: z.string().max(200).default(''),
+});
+
+export const sessionEntrySchema = z.object({
+  exerciseId: z.string().regex(/^[a-f0-9]{24}$/),
+  variationKey: z.string().max(40).default(''),
+  /** Snapshot of the plan's target when the workout started. */
+  target: sessionTargetSchema,
+  sets: z.array(sessionSetSchema).max(50),
+});
+export type SessionEntry = z.infer<typeof sessionEntrySchema>;
+
+export const sessionInputSchema = z.object({
+  planId: z
+    .string()
+    .regex(/^[a-f0-9]{24}$/)
+    .nullable()
+    .default(null),
+  date: dateString,
+  dayIndex: z.number().int().min(0).max(6),
+  startedAt: isoDateTime,
+  finishedAt: isoDateTime.nullable().default(null),
+  notes: z.string().trim().max(1000).default(''),
+  /** Increases with every local change; the server ignores older revisions. */
+  rev: z.number().int().min(0),
+  entries: z.array(sessionEntrySchema).max(60),
+});
+export type SessionInput = z.infer<typeof sessionInputSchema>;
+
+/** Session ids are generated on the phone so workouts can start offline. */
+export const sessionIdSchema = z.string().regex(/^[A-Za-z0-9-]{8,64}$/);
+
+export interface WorkoutSession extends SessionInput {
+  id: string;
+  updatedAt: string;
+}
+
+export interface LastPerformance {
+  date: string;
+  variationKey: string;
+  sets: SessionSet[];
+}
+
+export interface TodayResponse {
+  /** Today's date and weekday in the user's timezone. */
+  date: string;
+  todayIndex: number;
+  /** The weekday being shown (today unless another day was picked). */
+  dayIndex: number;
+  plan: {
+    id: string;
+    name: string;
+    days: Pick<PlanDay, 'dayIndex' | 'label' | 'type' | 'intensity'>[];
+  } | null;
+  day: PlanDay | null;
+  exercises: Exercise[];
+  last: Record<string, LastPerformance>;
+  session: WorkoutSession | null;
+}

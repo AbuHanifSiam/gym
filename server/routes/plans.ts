@@ -12,7 +12,8 @@ import { PlanModel, type PlanFields } from '../models/Plan.js';
 import { buildDefaultPlan } from '../seed/plan.js';
 import { seedUserExercises } from '../seed/seedUser.js';
 
-type Lean = PlanFields & { _id: Types.ObjectId };
+export type LeanPlan = PlanFields & { _id: Types.ObjectId };
+type Lean = LeanPlan;
 
 export function toPlan(p: Lean): Plan {
   return {

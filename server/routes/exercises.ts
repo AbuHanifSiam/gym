@@ -6,7 +6,8 @@ import { ExerciseModel, type ExerciseFields } from '../models/Exercise.js';
 import { PlanModel } from '../models/Plan.js';
 import { backfillSeedImages, seedUserExercises } from '../seed/seedUser.js';
 
-type Lean = ExerciseFields & { _id: mongoose.Types.ObjectId };
+export type LeanExercise = ExerciseFields & { _id: mongoose.Types.ObjectId };
+type Lean = LeanExercise;
 
 export function toExercise(e: Lean): Exercise {
   return {

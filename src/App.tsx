@@ -9,6 +9,7 @@ import Placeholder from './pages/Placeholder';
 import PlanBuilderPage from './pages/PlanBuilderPage';
 import PlansPage from './pages/PlansPage';
 import SettingsPage from './pages/SettingsPage';
+import TodayPage from './pages/TodayPage';
 
 function RequireAuth() {
   const { data: user, isPending, isError } = useMe();
@@ -38,7 +39,7 @@ export default function App() {
       </Route>
       <Route element={<RequireAuth />}>
         <Route element={<Layout />}>
-          <Route index element={<Placeholder title="Today" phase={4} />} />
+          <Route index element={<TodayPage />} />
           <Route path="/plan" element={<PlansPage />} />
           <Route path="/plan/:id" element={<PlanBuilderPage />} />
           <Route path="/exercises" element={<ExercisesPage />} />

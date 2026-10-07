@@ -5,7 +5,9 @@ import { authRoutes } from './routes/auth.js';
 import { exerciseRoutes } from './routes/exercises.js';
 import { healthRoutes } from './routes/health.js';
 import { planRoutes } from './routes/plans.js';
+import { sessionRoutes } from './routes/sessions.js';
 import { settingsRoutes } from './routes/settings.js';
+import { todayRoutes } from './routes/today.js';
 
 const routes: Route[] = [
   ...healthRoutes,
@@ -13,6 +15,8 @@ const routes: Route[] = [
   ...exerciseRoutes,
   ...planRoutes,
   ...settingsRoutes,
+  ...todayRoutes,
+  ...sessionRoutes,
 ];
 
 export async function handle(req: VercelRequest, res: VercelResponse) {

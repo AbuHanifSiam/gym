@@ -1,0 +1,131 @@
+import { describe, expect, it } from 'vitest';
+import type { PlanDay } from '../shared/schemas.js';
+import { addDays, displayToKg, kgToDisplay, localDay, weekdayOf } from '../shared/time.js';
+import {
+  addSet,
+  buildSession,
+  completeSet,
+  formatDuration,
+  isLastOpenSet,
+  removeLastSet,
+  sessionStats,
+} from '../src/workout/session.js';
+
+const day: PlanDay = {
+  dayIndex: 6,
+  label: 'Day 1',
+  type: 'train',
+  intensity: 'hard',
+  items: [
+    {
+      exerciseId: 'a'.repeat(24),
+      sets: 3,
+      repsMin: 10,
+      repsMax: 12,
+      durationSec: null,
+      variationKey: 'wide-overhand',
+      notes: '',
+    },
+    {
+      exerciseId: 'b'.repeat(24),
+      sets: 2,
+      repsMin: null,
+      repsMax: null,
+      durationSec: 30,
+      variationKey: '',
+      notes: '',
+    },
+  ],
+};
+
+describe('workout session', () => {
+  const s = buildSession({ planId: null, date: '2026-10-10', day });
+
+  it('builds one empty set per planned set and snapshots the target', () => {
+    expect(s.entries.map((e) => e.sets.length)).toEqual([3, 2]);
+    expect(s.entries[0].target).toMatchObject({ repsMin: 10, repsMax: 12 });
+    expect(s.entries[0].variationKey).toBe('wide-overhand');
+    expect(s.entries[0].sets.every((x) => !x.done)).toBe(true);
+  });
+
+  it('fills a ticked set from last time, else from the target', () => {
+    const last = {
+      date: '2026-10-08',
+      variationKey: '',
+      sets: [{ setNumber: 1, weight: 25, reps: 11, durationSec: null, done: true }],
+    };
+    const a = completeSet(s, 0, 0, last, false);
+    expect(a.entries[0].sets[0]).toMatchObject({ done: true, weight: 25, reps: 11 });
+    const b = completeSet(s, 0, 1, undefined, false);
+    expect(b.entries[0].sets[1]).toMatchObject({ done: true, weight: null, reps: 12 });
+    const c = completeSet(s, 1, 0, undefined, true);
+    expect(c.entries[1].sets[0]).toMatchObject({ done: true, durationSec: 30 });
+  });
+
+  it('keeps values the user typed', () => {
+    const typed = { ...s, entries: s.entries.map((e) => ({ ...e })) };
+    typed.entries[0] = {
+      ...typed.entries[0],
+      sets: typed.entries[0].sets.map((x, i) => (i === 0 ? { ...x, weight: 30, reps: 8 } : x)),
+    };
+    const done = completeSet(typed, 0, 0, undefined, false);
+    expect(done.entries[0].sets[0]).toMatchObject({ weight: 30, reps: 8, done: true });
+  });
+
+  it('adds sets carrying the weight forward, and removes the last set', () => {
+    const withWeight = completeSet(
+      s,
+      0,
+      2,
+      {
+        date: 'x',
+        variationKey: '',
+        sets: [{ setNumber: 3, weight: 40, reps: 10, durationSec: null, done: true }],
+      },
+      false,
+    );
+    const added = addSet(withWeight, 0);
+    expect(added.entries[0].sets).toHaveLength(4);
+    expect(added.entries[0].sets[3]).toMatchObject({ setNumber: 4, weight: 40, done: false });
+    expect(removeLastSet(added, 0).entries[0].sets).toHaveLength(3);
+  });
+
+  it('computes stats and detects the final set', () => {
+    let x = s;
+    for (const [ei, si] of [
+      [0, 0],
+      [0, 1],
+      [0, 2],
+      [1, 0],
+    ] as const)
+      x = completeSet(x, ei, si, undefined, ei === 1);
+    expect(isLastOpenSet(x, 1, 1)).toBe(true);
+    expect(isLastOpenSet(x, 0, 0)).toBe(false);
+    expect(sessionStats(x)).toMatchObject({ totalSets: 5, doneSets: 4, doneExercises: 1 });
+  });
+
+  it('formats durations', () => {
+    expect(formatDuration(65_000)).toBe('1:05');
+    expect(formatDuration(3_725_000)).toBe('1:02:05');
+  });
+});
+
+describe('time helpers', () => {
+  it('uses the user timezone for the date and weekday', () => {
+    // 2026-10-09 20:30 UTC is already Saturday 2026-10-10 in Dhaka (UTC+6).
+    const now = new Date('2026-10-09T20:30:00Z');
+    expect(localDay('Asia/Dhaka', now)).toEqual({ date: '2026-10-10', dayIndex: 6 });
+    expect(localDay('UTC', now)).toEqual({ date: '2026-10-09', dayIndex: 5 });
+  });
+
+  it('does date arithmetic and weekday lookup', () => {
+    expect(addDays('2026-12-31', 1)).toBe('2027-01-01');
+    expect(weekdayOf('2026-10-10')).toBe(6);
+  });
+
+  it('converts units', () => {
+    expect(kgToDisplay(20, 'lb')).toBe(44.1);
+    expect(kgToDisplay(displayToKg(100, 'lb'), 'lb')).toBe(100);
+    expect(displayToKg(22.5, 'kg')).toBe(22.5);
+  });
+});
