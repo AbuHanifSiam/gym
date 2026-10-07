@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { useMe } from './api/auth';
+import { useTheme } from './theme';
 import Layout from './components/Layout';
 import AuthPage from './pages/AuthPage';
 import TodayPage from './pages/TodayPage';
@@ -37,6 +38,8 @@ function FullScreenMessage({ text }: { text: string }) {
 }
 
 export default function App() {
+  const { data: me } = useMe();
+  useTheme(me?.settings.theme);
   return (
     <Routes>
       <Route element={<GuestOnly />}>

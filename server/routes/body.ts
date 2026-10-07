@@ -6,7 +6,7 @@ import { BodyLogModel, type BodyLogFields } from '../models/BodyLog.js';
 
 type Lean = BodyLogFields & { _id: Types.ObjectId };
 
-function toBodyLog(b: Lean): BodyLog {
+export function toBodyLog(b: Lean): BodyLog {
   const m = b.measurements ?? {};
   return {
     id: String(b._id),

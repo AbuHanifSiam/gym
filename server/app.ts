@@ -4,6 +4,7 @@ import { matchRoute, sendError, type Route } from './http.js';
 import { authRoutes } from './routes/auth.js';
 import { bodyRoutes } from './routes/body.js';
 import { exerciseRoutes } from './routes/exercises.js';
+import { exportRoutes } from './routes/export.js';
 import { healthRoutes } from './routes/health.js';
 import { planRoutes } from './routes/plans.js';
 import { progressRoutes } from './routes/progress.js';
@@ -21,6 +22,7 @@ const routes: Route[] = [
   ...sessionRoutes,
   ...progressRoutes,
   ...bodyRoutes,
+  ...exportRoutes,
 ];
 
 export async function handle(req: VercelRequest, res: VercelResponse) {

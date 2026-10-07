@@ -263,7 +263,7 @@ function ExerciseForm({ existing }: { existing?: Exercise }) {
               <img
                 src={img.url}
                 alt=""
-                className="size-20 shrink-0 rounded-lg bg-white object-contain ring-1 ring-slate-200"
+                className="size-20 shrink-0 rounded-lg bg-white object-contain ring-1 ring-slate-200 dark:ring-slate-700"
               />
             ) : (
               <div className="size-20 shrink-0 rounded-lg bg-slate-100 dark:bg-slate-800" />

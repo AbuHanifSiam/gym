@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Dark mode follows the .dark class on <html> (set from Settings: light / dark / system). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
@@ -38,10 +41,9 @@
   --chart-grid: #e2e8f0;
   --chart-axis: #64748b;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --chart-series: #0ea371;
-    --chart-grid: #1e293b;
-    --chart-axis: #94a3b8;
-  }
+.dark {
+  --chart-series: #0ea371;
+  --chart-grid: #1e293b;
+  --chart-axis: #94a3b8;
+  color-scheme: dark;
 }
