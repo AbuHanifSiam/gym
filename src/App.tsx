@@ -3,10 +3,10 @@ import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { useMe } from './api/auth';
 import Layout from './components/Layout';
 import AuthPage from './pages/AuthPage';
-import Placeholder from './pages/Placeholder';
 import TodayPage from './pages/TodayPage';
 
 // Today and login load first; other screens (charts, drag-and-drop) load when opened.
+const BodyPage = lazy(() => import('./pages/BodyPage'));
 const ExerciseDetailPage = lazy(() => import('./pages/ExerciseDetailPage'));
 const ExerciseFormPage = lazy(() => import('./pages/ExerciseFormPage'));
 const ExercisesPage = lazy(() => import('./pages/ExercisesPage'));
@@ -55,7 +55,7 @@ export default function App() {
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/progress/exercise/:id" element={<ExerciseProgressPage />} />
           <Route path="/progress/session/:id" element={<SessionDetailPage />} />
-          <Route path="/body" element={<Placeholder title="Body log" phase={6} />} />
+          <Route path="/body" element={<BodyPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Route>

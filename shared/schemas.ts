@@ -341,3 +341,35 @@ export interface ProgressSummary {
   week: { done: number; planned: number; start: string };
   totalWorkouts: number;
 }
+
+// ---------- Body log ----------
+
+export const measurementKeys = ['chest', 'waist', 'arm', 'thigh'] as const;
+export type MeasurementKey = (typeof measurementKeys)[number];
+
+const optionalMeasure = (max: number) => z.number().min(0).max(max).nullable().default(null);
+
+/** Weight in kg, measurements in cm (converted for display). */
+export const bodyLogInputSchema = z
+  .object({
+    date: dateString,
+    weight: optionalMeasure(500),
+    measurements: z
+      .object({
+        chest: optionalMeasure(300),
+        waist: optionalMeasure(300),
+        arm: optionalMeasure(150),
+        thigh: optionalMeasure(200),
+      })
+      .default({ chest: null, waist: null, arm: null, thigh: null }),
+    notes: z.string().trim().max(500).default(''),
+  })
+  .refine((b) => b.weight != null || measurementKeys.some((k) => b.measurements[k] != null), {
+    message: 'Enter your weight or at least one measurement',
+    path: ['weight'],
+  });
+export type BodyLogInput = z.infer<typeof bodyLogInputSchema>;
+
+export interface BodyLog extends BodyLogInput {
+  id: string;
+}

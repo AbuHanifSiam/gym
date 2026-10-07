@@ -1,18 +1,10 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import type { ExercisePoint, PersonalRecord } from '../../shared/progress';
 import { kgToDisplay } from '../../shared/time';
 import { useMe } from '../api/auth';
 import { useExerciseProgress } from '../api/progress';
+import TrendChart, { shortDate } from '../components/TrendChart';
 
 type MetricId = 'topWeight' | 'est1rm' | 'bestReps' | 'volume' | 'bestDuration';
 
@@ -31,13 +23,6 @@ const metrics: Metric[] = [
   { id: 'volume', label: 'Volume', unit: (u) => u, weighted: true },
   { id: 'bestDuration', label: 'Longest hold', unit: () => 's', weighted: false },
 ];
-
-const shortDate = (d: string) =>
-  new Date(`${d}T00:00:00Z`).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
 
 export default function ExerciseProgressPage() {
   const { id } = useParams();
@@ -158,55 +143,12 @@ export default function ExerciseProgressPage() {
                   appears after your second.
                 </p>
               ) : (
-                <div
-                  className="h-56"
-                  role="img"
-                  aria-label={`${metric.label} over time, see table below`}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={series} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
-                      <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
-                      <XAxis
-                        dataKey="date"
-                        tickFormatter={shortDate}
-                        tick={{ fill: 'var(--chart-axis)', fontSize: 12 }}
-                        tickLine={false}
-                        axisLine={{ stroke: 'var(--chart-grid)' }}
-                        minTickGap={24}
-                      />
-                      <YAxis
-                        tick={{ fill: 'var(--chart-axis)', fontSize: 12 }}
-                        tickLine={false}
-                        axisLine={false}
-                        width={48}
-                        domain={['auto', 'auto']}
-                        allowDecimals={metric.weighted}
-                      />
-                      <Tooltip
-                        cursor={{ stroke: 'var(--chart-axis)', strokeDasharray: '3 3' }}
-                        content={({ active, payload }) =>
-                          active && payload?.[0] ? (
-                            <div className="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white shadow-lg">
-                              <p className="text-white/70">{shortDate(payload[0].payload.date)}</p>
-                              <p className="font-semibold">
-                                {payload[0].value} {metric.unit(units)}
-                              </p>
-                            </div>
-                          ) : null
-                        }
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="value"
-                        stroke="var(--chart-series)"
-                        strokeWidth={2}
-                        dot={{ r: 4, fill: 'var(--chart-series)', strokeWidth: 0 }}
-                        activeDot={{ r: 6 }}
-                        isAnimationActive={false}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                <TrendChart
+                  data={series}
+                  unit={metric.unit(units)}
+                  label={`${metric.label} over time`}
+                  decimals={metric.weighted}
+                />
               )}
             </section>
           )}

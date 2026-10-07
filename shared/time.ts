@@ -49,3 +49,17 @@ export function kgToDisplay(kg: number, units: 'kg' | 'lb'): number {
 export function displayToKg(v: number, units: 'kg' | 'lb'): number {
   return units === 'lb' ? Math.round(v * KG_PER_LB * 1000) / 1000 : v;
 }
+
+export const CM_PER_IN = 2.54;
+
+/** Body measurements: cm stored, inches shown when the user uses lb. */
+export function cmToDisplay(cm: number, units: 'kg' | 'lb'): number {
+  const v = units === 'lb' ? cm / CM_PER_IN : cm;
+  return Math.round(v * 10) / 10;
+}
+
+export function displayToCm(v: number, units: 'kg' | 'lb'): number {
+  return units === 'lb' ? Math.round(v * CM_PER_IN * 100) / 100 : v;
+}
+
+export const lengthUnit = (units: 'kg' | 'lb') => (units === 'lb' ? 'in' : 'cm');

@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectDb } from './db.js';
 import { matchRoute, sendError, type Route } from './http.js';
 import { authRoutes } from './routes/auth.js';
+import { bodyRoutes } from './routes/body.js';
 import { exerciseRoutes } from './routes/exercises.js';
 import { healthRoutes } from './routes/health.js';
 import { planRoutes } from './routes/plans.js';
@@ -19,6 +20,7 @@ const routes: Route[] = [
   ...todayRoutes,
   ...sessionRoutes,
   ...progressRoutes,
+  ...bodyRoutes,
 ];
 
 export async function handle(req: VercelRequest, res: VercelResponse) {
