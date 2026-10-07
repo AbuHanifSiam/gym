@@ -109,3 +109,118 @@ export interface Exercise extends ExerciseInput {
   createdAt: string;
   updatedAt: string;
 }
+
+// ---------- Settings ----------
+
+export const settingsUpdateSchema = z
+  .object({
+    timezone: z
+      .string()
+      .trim()
+      .max(64)
+      .refine((tz) => {
+        try {
+          new Intl.DateTimeFormat('en', { timeZone: tz });
+          return true;
+        } catch {
+          return false;
+        }
+      }, 'Unknown timezone'),
+    weekStartDay: z.number().int().min(0).max(6),
+    units: z.enum(units),
+    restTimerDefault: z.number().int().min(10).max(600),
+    restTimerHeavy: z.number().int().min(10).max(600),
+    theme: z.enum(themes),
+  })
+  .partial();
+export type SettingsUpdate = z.infer<typeof settingsUpdateSchema>;
+
+// ---------- Plans ----------
+
+/** 0 = Sunday ... 6 = Saturday (same as JavaScript's Date.getDay()). */
+export const weekdayNames = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+] as const;
+export const dayTypes = ['train', 'rest'] as const;
+export const intensities = ['hard', 'moderate'] as const;
+
+const optionalInt = (max: number) => z.number().int().min(0).max(max).nullable().default(null);
+
+export const planItemSchema = z
+  .object({
+    exerciseId: z.string().regex(/^[a-f0-9]{24}$/, 'Pick an exercise'),
+    sets: z.number().int().min(1, 'At least 1 set').max(20),
+    /** null + null = "max reps" */
+    repsMin: optionalInt(200),
+    repsMax: optionalInt(200),
+    /** For timed exercises (plank, warm-up). */
+    durationSec: optionalInt(3600),
+    variationKey: z.string().trim().max(40).default(''),
+    notes: z.string().trim().max(200).default(''),
+  })
+  .refine((i) => i.repsMin == null || i.repsMax == null || i.repsMin <= i.repsMax, {
+    message: 'Min reps must not be more than max reps',
+    path: ['repsMax'],
+  });
+export type PlanItem = z.infer<typeof planItemSchema>;
+
+export const planDaySchema = z
+  .object({
+    dayIndex: z.number().int().min(0).max(6),
+    label: z.string().trim().max(40).default(''),
+    type: z.enum(dayTypes),
+    intensity: z.enum(intensities).nullable().default(null),
+    items: z.array(planItemSchema).max(40).default([]),
+  })
+  .transform((d) =>
+    // Rest days carry no exercises or intensity.
+    d.type === 'rest' ? { ...d, intensity: null, items: [] } : d,
+  );
+export type PlanDay = z.infer<typeof planDaySchema>;
+
+export const planInputSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required').max(60),
+  days: z
+    .array(planDaySchema)
+    .length(7, 'A plan needs all 7 days')
+    .refine((days) => new Set(days.map((d) => d.dayIndex)).size === 7, 'Each weekday once'),
+});
+export type PlanInput = z.infer<typeof planInputSchema>;
+
+export interface Plan extends PlanInput {
+  id: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlanSummary {
+  id: string;
+  name: string;
+  isActive: boolean;
+  trainingDays: number;
+  updatedAt: string;
+}
+
+/** Days ordered from the user's chosen first weekday. */
+export function orderedDays<T extends { dayIndex: number }>(days: T[], weekStartDay: number): T[] {
+  return [...days].sort(
+    (a, b) => ((a.dayIndex - weekStartDay + 7) % 7) - ((b.dayIndex - weekStartDay + 7) % 7),
+  );
+}
+
+export function emptyWeek(): PlanDay[] {
+  return weekdayNames.map((_, dayIndex) => ({
+    dayIndex,
+    label: '',
+    type: 'rest' as const,
+    intensity: null,
+    items: [],
+  }));
+}

@@ -4,7 +4,7 @@ import { clearSessionCookie, requireUser, setSessionCookie, toPublicUser } from 
 import { ApiError, clientIp, parse, type Route } from '../http.js';
 import { LoginAttempt } from '../models/LoginAttempt.js';
 import { User } from '../models/User.js';
-import { seedUserExercises } from '../seed/seedUser.js';
+import { createDefaultPlan } from './plans.js';
 
 const MAX_FAILED_LOGINS = 5;
 // Compared against when the email doesn't exist, so timing doesn't reveal registered emails.
@@ -30,7 +30,7 @@ export const authRoutes: Route[] = [
       }
       const passwordHash = await bcrypt.hash(input.password, 12);
       const user = await User.create({ email: input.email, name: input.name, passwordHash });
-      await seedUserExercises(user._id);
+      await createDefaultPlan(user._id, true);
       setSessionCookie(req, res, String(user._id));
       res.status(201).json({ user: toPublicUser(user) });
     },

@@ -6,6 +6,8 @@ import ExerciseDetailPage from './pages/ExerciseDetailPage';
 import ExerciseFormPage from './pages/ExerciseFormPage';
 import ExercisesPage from './pages/ExercisesPage';
 import Placeholder from './pages/Placeholder';
+import PlanBuilderPage from './pages/PlanBuilderPage';
+import PlansPage from './pages/PlansPage';
 import SettingsPage from './pages/SettingsPage';
 
 function RequireAuth() {
@@ -37,7 +39,8 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<Layout />}>
           <Route index element={<Placeholder title="Today" phase={4} />} />
-          <Route path="/plan" element={<Placeholder title="Plan" phase={3} />} />
+          <Route path="/plan" element={<PlansPage />} />
+          <Route path="/plan/:id" element={<PlanBuilderPage />} />
           <Route path="/exercises" element={<ExercisesPage />} />
           <Route path="/exercises/new" element={<ExerciseFormPage />} />
           <Route path="/exercises/:id" element={<ExerciseDetailPage />} />

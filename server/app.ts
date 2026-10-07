@@ -4,8 +4,16 @@ import { matchRoute, sendError, type Route } from './http.js';
 import { authRoutes } from './routes/auth.js';
 import { exerciseRoutes } from './routes/exercises.js';
 import { healthRoutes } from './routes/health.js';
+import { planRoutes } from './routes/plans.js';
+import { settingsRoutes } from './routes/settings.js';
 
-const routes: Route[] = [...healthRoutes, ...authRoutes, ...exerciseRoutes];
+const routes: Route[] = [
+  ...healthRoutes,
+  ...authRoutes,
+  ...exerciseRoutes,
+  ...planRoutes,
+  ...settingsRoutes,
+];
 
 export async function handle(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Cache-Control', 'no-store');

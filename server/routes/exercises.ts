@@ -3,6 +3,7 @@ import { exerciseInputSchema, type Exercise } from '../../shared/schemas.js';
 import { requireUserId } from '../auth.js';
 import { ApiError, parse, type Route } from '../http.js';
 import { ExerciseModel, type ExerciseFields } from '../models/Exercise.js';
+import { PlanModel } from '../models/Plan.js';
 import { backfillSeedImages, seedUserExercises } from '../seed/seedUser.js';
 
 type Lean = ExerciseFields & { _id: mongoose.Types.ObjectId };
@@ -113,7 +114,18 @@ export const exerciseRoutes: Route[] = [
     path: '/exercises/:id',
     handler: async (req, res, { id }) => {
       const userId = requireUserId(req);
-      const r = await ExerciseModel.deleteOne({ _id: objectId(id), userId });
+      const usedIn = await PlanModel.find(
+        { userId, 'days.items.exerciseId': objectId(id) },
+        { name: 1 },
+      ).lean();
+      if (usedIn.length) {
+        throw new ApiError(
+          409,
+          'in_use',
+          `Used in plan: ${usedIn.map((p) => p.name).join(', ')}. Remove it from the plan first.`,
+        );
+      }
+      const r = await ExerciseModel.deleteOne({ _id: id, userId });
       if (r.deletedCount === 0) throw new ApiError(404, 'not_found', 'Exercise not found');
       res.json({ ok: true });
     },
