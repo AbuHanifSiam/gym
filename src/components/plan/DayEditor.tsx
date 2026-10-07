@@ -97,7 +97,7 @@ export default function DayEditor({
             key={t}
             type="button"
             aria-pressed={day.type === t}
-            className={`btn ${day.type === t ? 'bg-emerald-600 text-white' : 'btn-ghost'}`}
+            className={`btn ${day.type === t ? 'bg-emerald-700 text-white' : 'btn-ghost'}`}
             onClick={() =>
               onChange({
                 ...day,
@@ -175,7 +175,7 @@ export default function DayEditor({
                             <button
                               type="button"
                               {...handle}
-                              className="grid min-h-12 w-9 shrink-0 cursor-grab touch-none place-items-center text-xl text-slate-400"
+                              className="grid min-h-12 w-9 shrink-0 cursor-grab touch-none place-items-center text-xl text-slate-500"
                               aria-label={`Drag to reorder ${ex?.name ?? 'exercise'}`}
                             >
                               ⠿
@@ -195,22 +195,22 @@ export default function DayEditor({
                                 {item.notes && ` · ${item.notes}`}
                               </span>
                             </button>
-                            <div className="flex shrink-0 flex-col">
+                            <div className="flex shrink-0">
                               <button
                                 type="button"
-                                className="grid h-7 w-10 place-items-center text-slate-500 disabled:opacity-30"
+                                className="grid size-11 place-items-center rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 dark:hover:bg-slate-800"
                                 onClick={() => move(i, i - 1)}
                                 disabled={i === 0}
-                                aria-label="Move up"
+                                aria-label={`Move ${ex?.name ?? 'exercise'} up`}
                               >
                                 ▲
                               </button>
                               <button
                                 type="button"
-                                className="grid h-7 w-10 place-items-center text-slate-500 disabled:opacity-30"
+                                className="grid size-11 place-items-center rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 dark:hover:bg-slate-800"
                                 onClick={() => move(i, i + 1)}
                                 disabled={i === day.items.length - 1}
-                                aria-label="Move down"
+                                aria-label={`Move ${ex?.name ?? 'exercise'} down`}
                               >
                                 ▼
                               </button>

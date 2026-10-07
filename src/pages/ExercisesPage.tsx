@@ -51,9 +51,9 @@ export default function ExercisesPage() {
             type="button"
             aria-pressed={category === c}
             onClick={() => setCategory(c)}
-            className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-medium capitalize ${
+            className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-medium capitalize ${
               category === c
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-emerald-700 text-white'
                 : 'bg-white ring-1 ring-slate-300 dark:bg-slate-900 dark:ring-slate-700'
             }`}
           >
@@ -109,7 +109,7 @@ export default function ExercisesPage() {
         <div className="pt-4 text-center">
           <button
             type="button"
-            className="text-sm font-medium text-emerald-600 underline-offset-4 hover:underline"
+            className="text-sm font-medium text-emerald-700 dark:text-emerald-400 underline-offset-4 hover:underline"
             onClick={() => seed.mutate()}
             disabled={seed.isPending}
           >

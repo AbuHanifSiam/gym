@@ -38,7 +38,10 @@ export default function ExerciseDetailPage() {
 
   return (
     <article className="space-y-4">
-      <Link to="/exercises" className="inline-block py-2 text-sm text-emerald-600">
+      <Link
+        to="/exercises"
+        className="inline-block py-2 text-sm text-emerald-700 dark:text-emerald-400"
+      >
         ‹ Library
       </Link>
       <header>

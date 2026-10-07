@@ -113,7 +113,7 @@ function ExerciseForm({ existing }: { existing?: Exercise }) {
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <Link
         to={existing ? `/exercises/${existing.id}` : '/exercises'}
-        className="inline-block py-2 text-sm text-emerald-600"
+        className="inline-block py-2 text-sm text-emerald-700 dark:text-emerald-400"
       >
         ‹ Cancel
       </Link>

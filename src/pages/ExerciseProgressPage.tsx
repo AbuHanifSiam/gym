@@ -60,7 +60,10 @@ export default function ExerciseProgressPage() {
 
   return (
     <article className="space-y-4">
-      <Link to="/progress?tab=exercises" className="inline-block py-2 text-sm text-emerald-600">
+      <Link
+        to="/progress?tab=exercises"
+        className="inline-block py-2 text-sm text-emerald-700 dark:text-emerald-400"
+      >
         ‹ Progress
       </Link>
       <h1 className="text-2xl font-bold">{exercise.name}</h1>
@@ -123,9 +126,9 @@ export default function ExerciseProgressPage() {
                     type="button"
                     aria-pressed={m.id === metric.id}
                     onClick={() => setPicked(m.id)}
-                    className={`min-h-10 shrink-0 rounded-full px-3 text-sm font-medium ${
+                    className={`min-h-11 shrink-0 rounded-full px-3 text-sm font-medium ${
                       m.id === metric.id
-                        ? 'bg-emerald-600 text-white'
+                        ? 'bg-emerald-700 text-white'
                         : 'ring-1 ring-slate-300 dark:ring-slate-700'
                     }`}
                   >

@@ -103,7 +103,7 @@ export default function SetRow({
         aria-label={`Set ${label} ${set.done ? 'done, tap to undo' : 'mark done'}`}
         className={`grid size-14 shrink-0 place-items-center rounded-xl text-2xl font-bold transition active:scale-95 ${
           set.done
-            ? 'bg-emerald-600 text-white'
+            ? 'bg-emerald-700 text-white'
             : 'bg-white text-slate-300 ring-2 ring-slate-300 dark:bg-slate-900 dark:text-slate-600 dark:ring-slate-700'
         }`}
       >

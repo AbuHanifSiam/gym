@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectDb } from './db.js';
-import { matchRoute, sendError, type Route } from './http.js';
+import { assertSameOrigin, matchRoute, sendError, type Route } from './http.js';
 import { authRoutes } from './routes/auth.js';
 import { bodyRoutes } from './routes/body.js';
 import { exerciseRoutes } from './routes/exercises.js';
@@ -12,7 +12,7 @@ import { sessionRoutes } from './routes/sessions.js';
 import { settingsRoutes } from './routes/settings.js';
 import { todayRoutes } from './routes/today.js';
 
-const routes: Route[] = [
+export const routes: Route[] = [
   ...healthRoutes,
   ...authRoutes,
   ...exerciseRoutes,
@@ -32,6 +32,7 @@ export async function handle(req: VercelRequest, res: VercelResponse) {
     const raw = req.query.__path;
     const pathname = '/' + (Array.isArray(raw) ? raw.join('/') : (raw ?? ''));
     const { route, params } = matchRoute(routes, req.method ?? 'GET', pathname);
+    assertSameOrigin(req);
     if (!route.noDb) await connectDb();
     await route.handler(req, res, params);
   } catch (err) {

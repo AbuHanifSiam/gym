@@ -59,7 +59,7 @@ function shiftMonth(month: string, delta: number): string {
 }
 
 const statusStyle: Record<DayStatus, { cls: string; mark: string; label: string }> = {
-  trained: { cls: 'bg-emerald-600 text-white', mark: '✓', label: 'Trained' },
+  trained: { cls: 'bg-emerald-700 text-white', mark: '✓', label: 'Trained' },
   missed: {
     cls: 'bg-red-50 text-red-700 ring-1 ring-red-300 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900',
     mark: '✕',
@@ -75,7 +75,7 @@ const statusStyle: Record<DayStatus, { cls: string; mark: string; label: string 
     mark: '',
     label: 'Planned',
   },
-  none: { cls: 'text-slate-400', mark: '', label: '' },
+  none: { cls: 'text-slate-500', mark: '', label: '' },
 };
 
 function Overview() {

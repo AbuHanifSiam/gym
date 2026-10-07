@@ -79,7 +79,7 @@ export default function PlansPage() {
         <div className="pt-2 text-center">
           <button
             type="button"
-            className="text-sm font-medium text-emerald-600 underline-offset-4 hover:underline"
+            className="text-sm font-medium text-emerald-700 dark:text-emerald-400 underline-offset-4 hover:underline"
             onClick={newDefault}
             disabled={createDefault.isPending}
           >

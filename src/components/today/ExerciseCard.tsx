@@ -83,7 +83,7 @@ export default function ExerciseCard({
         <span
           className={`grid size-9 shrink-0 place-items-center rounded-full text-sm font-bold ${
             complete
-              ? 'bg-emerald-600 text-white'
+              ? 'bg-emerald-700 text-white'
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
           aria-hidden

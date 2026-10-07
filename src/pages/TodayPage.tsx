@@ -121,7 +121,7 @@ function DayPicker({
             onClick={() => onSelect(d.dayIndex)}
             className={`relative flex min-h-14 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl px-2 text-xs font-semibold ${
               active
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-emerald-700 text-white'
                 : 'bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800'
             }`}
           >
@@ -203,7 +203,7 @@ function Workout({
             const grip = ex?.variations.find((v) => v.key === item.variationKey);
             return (
               <li key={i} className="flex gap-3 text-sm">
-                <span className="w-5 shrink-0 text-right text-slate-400">{i + 1}.</span>
+                <span className="w-5 shrink-0 text-right text-slate-500">{i + 1}.</span>
                 <span className="min-w-0 flex-1">
                   {ex?.name ?? 'Unknown'}
                   {grip && (
@@ -391,7 +391,7 @@ function Summary({ session, units }: { session: WorkoutSession; units: 'kg' | 'l
   const stats = sessionStats(session);
   const duration = new Date(session.finishedAt!).getTime() - new Date(session.startedAt).getTime();
   return (
-    <div className="card space-y-3 bg-emerald-600 text-white ring-0 dark:bg-emerald-700">
+    <div className="card space-y-3 bg-emerald-700 text-white ring-0 dark:bg-emerald-700">
       <p className="text-xl font-bold">Workout done 💪</p>
       <dl className="grid grid-cols-3 gap-2 text-center">
         <div>

@@ -89,7 +89,7 @@ export default function AuthPage({ mode }: { mode: Mode }) {
       {isRegister ? (
         <p className="mt-6 text-center text-sm">
           Have an account?{' '}
-          <Link to="/login" className="font-semibold text-emerald-600">
+          <Link to="/login" className="font-semibold text-emerald-700 dark:text-emerald-400">
             Log in
           </Link>
         </p>
@@ -97,7 +97,7 @@ export default function AuthPage({ mode }: { mode: Mode }) {
         config?.registrationOpen && (
           <p className="mt-6 text-center text-sm">
             New here?{' '}
-            <Link to="/register" className="font-semibold text-emerald-600">
+            <Link to="/register" className="font-semibold text-emerald-700 dark:text-emerald-400">
               Create an account
             </Link>
           </p>

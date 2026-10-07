@@ -39,7 +39,7 @@ export default function RestTimerBar() {
           >
             +15
           </button>
-          <button type="button" className="btn min-h-14 bg-emerald-600 px-4" onClick={stopRest}>
+          <button type="button" className="btn min-h-14 bg-emerald-700 px-4" onClick={stopRest}>
             Skip
           </button>
         </div>

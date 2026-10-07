@@ -13,7 +13,10 @@
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "format:check": "prettier --check .",
+    "icons": "node scripts/generate-icons.mjs",
+    "check": "npm run lint && npm run typecheck && npm test && npm run format:check"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

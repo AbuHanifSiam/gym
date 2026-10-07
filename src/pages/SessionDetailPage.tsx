@@ -49,7 +49,10 @@ export default function SessionDetailPage() {
 
   return (
     <article className="space-y-4">
-      <Link to="/progress?tab=history" className="inline-block py-2 text-sm text-emerald-600">
+      <Link
+        to="/progress?tab=history"
+        className="inline-block py-2 text-sm text-emerald-700 dark:text-emerald-400"
+      >
         ‹ History
       </Link>
       <header>
@@ -84,7 +87,7 @@ export default function SessionDetailPage() {
               </div>
               {grip && <p className="text-sm text-slate-500">{grip.name}</p>}
               {done.length === 0 ? (
-                <p className="mt-1 text-sm text-slate-400">Skipped</p>
+                <p className="mt-1 text-sm text-slate-500">Skipped</p>
               ) : (
                 <ul className="mt-2 flex flex-wrap gap-1.5">
                   {done.map((x) => (

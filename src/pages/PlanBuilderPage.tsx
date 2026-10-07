@@ -148,7 +148,7 @@ function Builder({ plan, exercises }: { plan: Plan; exercises: Exercise[] }) {
     <div className="space-y-4">
       <Link
         to="/plan"
-        className="inline-block py-2 text-sm text-emerald-600"
+        className="inline-block py-2 text-sm text-emerald-700 dark:text-emerald-400"
         onClick={(e) => dirty && !confirm('Leave without saving?') && e.preventDefault()}
       >
         ‹ Plans

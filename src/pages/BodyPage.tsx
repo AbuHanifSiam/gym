@@ -85,9 +85,9 @@ export default function BodyPage() {
                   type="button"
                   aria-pressed={m === metric}
                   onClick={() => setPicked(m)}
-                  className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-medium ${
+                  className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-medium ${
                     m === metric
-                      ? 'bg-emerald-600 text-white'
+                      ? 'bg-emerald-700 text-white'
                       : 'ring-1 ring-slate-300 dark:ring-slate-700'
                   }`}
                 >
@@ -156,7 +156,7 @@ function WeightStats({ logs, units, today }: { logs: BodyLog[]; units: Units; to
         <dt className="text-xs font-semibold text-slate-500 uppercase">Change</dt>
         <dd className="mt-1">
           {base === latest ? (
-            <span className="text-slate-400">Log again to see change</span>
+            <span className="text-slate-500">Log again to see change</span>
           ) : (
             <>
               <span className="text-2xl font-bold tabular-nums">{change(base)}</span>

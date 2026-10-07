@@ -63,7 +63,7 @@ export function sendError(res: VercelResponse, err: unknown) {
       .status(err.status)
       .json({ error: { code: err.code, message: err.message, fields: err.fields } });
   }
-  console.error('Unhandled API error:', err instanceof Error ? err.message : err);
+  console.error('Unhandled API error:', err instanceof Error ? err.message : typeof err);
   return res.status(500).json({ error: { code: 'server_error', message: 'Something went wrong' } });
 }
 
@@ -71,4 +71,23 @@ export function clientIp(req: VercelRequest): string {
   const fwd = req.headers['x-forwarded-for'];
   const first = (Array.isArray(fwd) ? fwd[0] : fwd)?.split(',')[0]?.trim();
   return first || req.socket?.remoteAddress || 'unknown';
+}
+
+/**
+ * Blocks cross-site writes: a browser always sends Origin on POST/PUT/DELETE, and it must be
+ * this app's own host. (The SameSite=Lax cookie already stops most of these; this is a second
+ * layer.) Requests without Origin (curl, server-to-server) carry no cookie by accident.
+ */
+export function assertSameOrigin(req: VercelRequest) {
+  if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') return;
+  const origin = req.headers.origin;
+  if (!origin) return;
+  const host = req.headers['x-forwarded-host'] ?? req.headers.host;
+  let originHost: string;
+  try {
+    originHost = new URL(origin).host;
+  } catch {
+    throw new ApiError(403, 'bad_origin', 'Request blocked');
+  }
+  if (originHost !== host) throw new ApiError(403, 'bad_origin', 'Request blocked');
 }
