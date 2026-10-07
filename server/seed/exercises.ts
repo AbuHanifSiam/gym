@@ -1,0 +1,302 @@
+import type { ExerciseInput } from '../../shared/schemas.js';
+
+type Seed = Omit<ExerciseInput, 'imageUrl' | 'videoUrl' | 'muscles' | 'steps' | 'variations'> &
+  Partial<Pick<ExerciseInput, 'muscles' | 'steps' | 'variations'>>;
+
+// Default library from the project plan (section 7). Names are the identity used to avoid duplicates.
+export const seedExercises: Seed[] = [
+  {
+    name: 'Warm-up',
+    category: 'cardio',
+    equipment: 'bodyweight',
+    measure: 'time',
+    heavyRest: false,
+    muscles: ['Full body'],
+    steps: [
+      'Walk or do light cardio for about 3 minutes.',
+      'Arm circles: 10 forwards, 10 backwards.',
+      'Bodyweight squats: 10 slow reps.',
+    ],
+  },
+  {
+    name: 'Squats',
+    category: 'legs',
+    equipment: 'bodyweight',
+    measure: 'reps',
+    heavyRest: true,
+    muscles: ['Quads', 'Glutes', 'Hamstrings', 'Core'],
+    steps: [
+      'Stand with feet shoulder-width apart.',
+      'Push your hips back and bend the knees, keeping the chest up.',
+      'Lower until your thighs are about parallel to the floor.',
+      'Push through your heels to stand back up.',
+    ],
+  },
+  {
+    name: 'Push-ups',
+    category: 'push',
+    equipment: 'bodyweight',
+    measure: 'reps',
+    heavyRest: false,
+    muscles: ['Chest', 'Triceps', 'Front shoulders', 'Core'],
+    steps: [
+      'Hands slightly wider than your shoulders.',
+      'Keep a straight line from head to heels.',
+      'Lower your chest to just above the floor, then push back up.',
+    ],
+    variations: [
+      {
+        key: 'standard',
+        name: 'Standard',
+        description: 'Hands and toes on the floor.',
+        works: 'Chest, triceps',
+      },
+      {
+        key: 'knees',
+        name: 'On knees',
+        description: 'Knees on the floor, body straight from knees to head.',
+        works: 'Easier version, same muscles',
+      },
+      {
+        key: 'incline',
+        name: 'Hands on bench',
+        description: 'Hands on a bench, feet on the floor.',
+        works: 'Easier version, more lower chest',
+      },
+    ],
+  },
+  {
+    name: 'Pull-up practice',
+    category: 'pull',
+    equipment: 'machine',
+    measure: 'reps',
+    heavyRest: true,
+    muscles: ['Lats', 'Biceps', 'Upper back'],
+    steps: [
+      'Use the assisted pull-up machine, or jump to the top of the bar.',
+      'If jumping: lower yourself slowly over 3-5 seconds.',
+      'Keep shoulders down and away from your ears.',
+    ],
+    variations: [
+      {
+        key: 'assisted',
+        name: 'Assisted machine',
+        description: 'Knees on the pad; more counterweight = easier.',
+        works: 'Lats, biceps',
+      },
+      {
+        key: 'negative',
+        name: 'Slow negatives',
+        description: 'Jump up, then lower slowly over 3-5 seconds.',
+        works: 'Builds strength for full pull-ups',
+      },
+    ],
+  },
+  {
+    name: 'Dumbbell shoulder press',
+    category: 'push',
+    equipment: 'dumbbell',
+    measure: 'reps',
+    heavyRest: false,
+    muscles: ['Shoulders', 'Triceps'],
+    steps: [
+      'Sit or stand with dumbbells at shoulder height, palms forward.',
+      'Press the dumbbells straight up without locking the elbows hard.',
+      'Lower slowly back to shoulder height.',
+    ],
+  },
+  {
+    name: 'Dumbbell side raise',
+    category: 'push',
+    equipment: 'dumbbell',
+    measure: 'reps',
+    heavyRest: false,
+    muscles: ['Side shoulders'],
+    steps: [
+      'Hold dumbbells at your sides, elbows slightly bent.',
+      'Raise your arms out to the sides up to shoulder height.',
+      'Lower slowly.',
+    ],
+  },
+  {
+    name: 'Dumbbell front raise',
+    category: 'push',
+    equipment: 'dumbbell',
+    measure: 'reps',
+    heavyRest: false,
+    muscles: ['Front shoulders'],
+    steps: [
+      'Hold dumbbells in front of your thighs.',
+      'Raise your arms straight in front of you to shoulder height.',
+      'Lower slowly.',
+    ],
+  },
+  {
+    name: 'Back push-up',
+    category: 'push',
+    equipment: 'bodyweight',
+    measure: 'reps',
+    heavyRest: false,
+    muscles: ['Triceps', 'Lower back'],
+    steps: ['Pick the version your trainer showed you (see grips/variations).'],
+    variations: [
+      {
+        key: 'bench-dips',
+        name: 'Bench dips',
+        description:
+          'Hands on a bench behind you, bend the elbows to lower your hips, then push up.',
+        works: 'Triceps, chest',
+      },
+      {
+        key: 'back-extension',
+        name: 'Back extension',
+        description:
+          'On the back extension bench, lower your upper body, then lift until your body is straight.',
+        works: 'Lower back, glutes',
+      },
+    ],
+  },
+  {
+    name: 'Dumbbell side bend',
+    category: 'core',
+    equipment: 'dumbbell',
+    measure: 'reps',
+    heavyRest: false,
+    muscles: ['Obliques'],
+    steps: [
+      'Stand holding one dumbbell at your side.',
+      'Bend sideways at the waist towards the dumbbell, then come back up.',
+      'Do all reps, then switch sides.',
+    ],
+  },
+  {
+    name: 'Lat pulldown',
+    category: 'pull',
+    equipment: 'machine',
+    measure: 'reps',
+    heavyRest: true,
+    muscles: ['Lats', 'Biceps', 'Upper back'],
+    steps: [
+      'Set the weight with the pin and lock your thighs under the pad.',
+      'Pull the bar to your upper chest, leading with the elbows.',
+      'Return slowly. Never pull behind the neck.',
+    ],
+    variations: [
+      {
+        key: 'wide-overhand',
+        name: 'Wide overhand',
+        description: 'Hands wider than shoulders, palms facing away.',
+        works: 'Outer lats, back width',
+      },
+      {
+        key: 'shoulder-overhand',
+        name: 'Shoulder-width overhand',
+        description: 'Hands at shoulder width, palms facing away.',
+        works: 'Lats, more biceps',
+      },
+      {
+        key: 'underhand',
+        name: 'Underhand',
+        description: 'Hands at shoulder width, palms facing you.',
+        works: 'Lower lats, biceps',
+      },
+      {
+        key: 'neutral-v',
+        name: 'Neutral V-handle',
+        description: 'V-handle, palms facing each other.',
+        works: 'Middle back, lats',
+      },
+      {
+        key: 'one-arm',
+        name: 'One arm at a time',
+        description: 'Single handle, pull with one arm, then switch.',
+        works: 'Each side evenly',
+      },
+    ],
+  },
+  {
+    name: 'Seated cable row',
+    category: 'pull',
+    equipment: 'machine',
+    measure: 'reps',
+    heavyRest: true,
+    muscles: ['Middle back', 'Lats', 'Biceps'],
+    steps: [
+      'Set the weight with the pin. Sit tall with feet on the platform.',
+      'Pull the handle to your belly (wide bar: to your chest).',
+      'Squeeze your shoulder blades together for 1 second.',
+      'Return slowly, keeping your back straight.',
+    ],
+    variations: [
+      {
+        key: 'v-handle',
+        name: 'V-handle',
+        description: 'Close grip, palms facing each other. Pull to the belly.',
+        works: 'Middle back, lats',
+      },
+      {
+        key: 'wide-bar',
+        name: 'Wide bar',
+        description: 'Wide overhand grip. Pull to the chest.',
+        works: 'Upper back, rear shoulders',
+      },
+      {
+        key: 'underhand-bar',
+        name: 'Underhand bar',
+        description: 'Shoulder-width grip, palms up.',
+        works: 'Lower lats, biceps',
+      },
+      {
+        key: 'rope',
+        name: 'Rope',
+        description: 'Rope handle, pull the ends apart as you reach your belly.',
+        works: 'Upper back, rear shoulders',
+      },
+      {
+        key: 'one-arm',
+        name: 'One arm at a time',
+        description: 'Single handle, one arm, then switch.',
+        works: 'Each side evenly',
+      },
+    ],
+  },
+  {
+    name: 'Lying leg raises',
+    category: 'core',
+    equipment: 'bodyweight',
+    measure: 'reps',
+    heavyRest: false,
+    muscles: ['Lower abs', 'Hip flexors'],
+    steps: [
+      'Lie on your back, legs together, hands under your hips.',
+      'Lift your legs to vertical.',
+      'Lower slowly without touching the floor.',
+    ],
+  },
+  {
+    name: 'Plank',
+    category: 'core',
+    equipment: 'bodyweight',
+    measure: 'time',
+    heavyRest: false,
+    muscles: ['Core', 'Shoulders'],
+    steps: [
+      'Forearms and toes on the floor.',
+      'Keep a straight line from head to heels.',
+      'Keep your stomach tight and breathe.',
+    ],
+  },
+  {
+    name: 'Stretching',
+    category: 'mobility',
+    equipment: 'bodyweight',
+    measure: 'time',
+    heavyRest: false,
+    muscles: ['Full body'],
+    steps: [
+      'Hold each stretch for 20-30 seconds, no bouncing.',
+      'Legs: quads, hamstrings, calves.',
+      'Upper body: chest, shoulders, lats, triceps.',
+    ],
+  },
+];

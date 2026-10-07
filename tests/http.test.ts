@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ApiError, matchRoute, parse, type Route } from '../server/http.js';
-import { loginSchema, registerSchema } from '../shared/schemas.js';
+import { exerciseInputSchema, loginSchema, registerSchema } from '../shared/schemas.js';
 
 const noop = async () => {};
 const routes: Route[] = [
@@ -49,5 +49,21 @@ describe('auth validation', () => {
 
   it('rejects a missing body', () => {
     expect(() => parse(loginSchema, undefined)).toThrow(ApiError);
+  });
+});
+
+describe('exercise validation', () => {
+  it('accepts every seed exercise', async () => {
+    const { seedExercises } = await import('../server/seed/exercises.js');
+    for (const e of seedExercises) expect(() => parse(exerciseInputSchema, e)).not.toThrow();
+  });
+
+  it('rejects duplicate variation keys and bad URLs', () => {
+    const base = { name: 'X', category: 'pull', equipment: 'machine' };
+    const v = { key: 'a', name: 'A' };
+    expect(() => parse(exerciseInputSchema, { ...base, variations: [v, v] })).toThrow(ApiError);
+    expect(() => parse(exerciseInputSchema, { ...base, videoUrl: 'javascript:alert(1)' })).toThrow(
+      ApiError,
+    );
   });
 });

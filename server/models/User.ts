@@ -1,5 +1,4 @@
 import mongoose, { type HydratedDocument, type Model } from 'mongoose';
-
 import type { UserSettings } from '../../shared/schemas.js';
 
 const { Schema, model, models } = mongoose;
