@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import type { TodayResponse } from '../../shared/schemas';
+import type { LastPerformance, TodayResponse } from '../../shared/schemas';
 import { api, ApiError } from './client';
 
 const cacheKey = (dayIndex: number | null) => `gt.today.${dayIndex ?? 'now'}`;
@@ -35,5 +35,20 @@ export function useToday(dayIndex: number | null) {
       }
     },
     staleTime: 60_000,
+  });
+}
+
+/** "Last time" numbers for exercises that weren't in the plan for this day (swapped or added). */
+export function useLastPerformance(ids: string[], excludeSessionId: string | undefined) {
+  const sorted = [...ids].sort();
+  return useQuery({
+    queryKey: ['last-performance', sorted, excludeSessionId],
+    enabled: sorted.length > 0,
+    queryFn: async () => {
+      const q = new URLSearchParams({ ids: sorted.join(',') });
+      if (excludeSessionId) q.set('exclude', excludeSessionId);
+      return (await api<{ last: Record<string, LastPerformance> }>(`/last-performance?${q}`)).last;
+    },
+    staleTime: 5 * 60_000,
   });
 }

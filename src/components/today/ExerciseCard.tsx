@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { Exercise, LastPerformance, SessionEntry, SessionSet } from '../../../shared/schemas';
 import { kgToDisplay } from '../../../shared/time';
@@ -29,6 +29,7 @@ export default function ExerciseCard({
   onAddSet,
   onRemoveSet,
   onVariation,
+  actions,
 }: {
   index: number;
   entry: SessionEntry;
@@ -42,6 +43,8 @@ export default function ExerciseCard({
   onAddSet: () => void;
   onRemoveSet: () => void;
   onVariation: (key: string) => void;
+  /** Today-only changes (reorder, swap, skip), shown while editing the list. */
+  actions?: ReactNode;
 }) {
   const [showHow, setShowHow] = useState(false);
   const timed = exercise?.measure === 'time' || entry.target.durationSec != null;
@@ -105,7 +108,9 @@ export default function ExerciseCard({
         </span>
       </button>
 
-      {open && (
+      {actions && <div className="px-4 pb-3">{actions}</div>}
+
+      {open && !actions && (
         <div className="space-y-4 px-4 pb-4">
           {exercise && exercise.variations.length > 0 && (
             <div className="rounded-xl bg-emerald-50 p-3 dark:bg-emerald-950/50">

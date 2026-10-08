@@ -114,6 +114,82 @@ export function setVariation(s: WorkoutSession, entryIdx: number, key: string): 
   return updateEntry(s, entryIdx, (e) => ({ ...e, variationKey: key }));
 }
 
+// ---------- Changing today's exercise list (the plan itself is untouched) ----------
+
+/** What a swapped-in or added exercise needs to know about itself. */
+export interface EntryExercise {
+  id: string;
+  measure: 'reps' | 'time';
+}
+
+/** Moves an entry one place up (-1) or down (+1). Out-of-range moves are ignored. */
+export function moveEntry(s: WorkoutSession, entryIdx: number, dir: -1 | 1): WorkoutSession {
+  const to = entryIdx + dir;
+  if (to < 0 || to >= s.entries.length) return s;
+  const entries = [...s.entries];
+  [entries[entryIdx], entries[to]] = [entries[to], entries[entryIdx]];
+  return { ...s, entries };
+}
+
+/** Skips an exercise for today: drops it from the workout, along with any sets logged. */
+export function removeEntry(s: WorkoutSession, entryIdx: number): WorkoutSession {
+  return { ...s, entries: s.entries.filter((_, i) => i !== entryIdx) };
+}
+
+/**
+ * Target for an exercise that wasn't planned. Keeps the planned set count and reps when the
+ * kind of exercise matches; a timed exercise swapped for a reps one (or back) gets defaults.
+ */
+function targetFor(ex: EntryExercise, base?: SessionEntry['target']): SessionEntry['target'] {
+  const sets = base && base.sets > 0 ? base.sets : 3;
+  const baseTimed = base?.durationSec != null;
+  if (ex.measure === 'time') {
+    return {
+      sets,
+      repsMin: null,
+      repsMax: null,
+      durationSec: baseTimed ? base!.durationSec : 30,
+      notes: '',
+    };
+  }
+  if (base && !baseTimed) return { ...base, sets, notes: '' };
+  return { sets, repsMin: 8, repsMax: 12, durationSec: null, notes: '' };
+}
+
+/** Does a different exercise in this slot, with fresh (empty) sets. */
+export function replaceEntry(
+  s: WorkoutSession,
+  entryIdx: number,
+  ex: EntryExercise,
+): WorkoutSession {
+  return updateEntry(s, entryIdx, (e) => {
+    const target = targetFor(ex, e.target);
+    return {
+      exerciseId: ex.id,
+      variationKey: '',
+      target,
+      sets: Array.from({ length: target.sets }, (_, n) => emptySet(n + 1)),
+    };
+  });
+}
+
+/** Adds an extra exercise at the end of today's workout. */
+export function addEntry(s: WorkoutSession, ex: EntryExercise): WorkoutSession {
+  const target = targetFor(ex);
+  return {
+    ...s,
+    entries: [
+      ...s.entries,
+      {
+        exerciseId: ex.id,
+        variationKey: '',
+        target,
+        sets: Array.from({ length: target.sets }, (_, n) => emptySet(n + 1)),
+      },
+    ],
+  };
+}
+
 export interface SessionStats {
   totalSets: number;
   doneSets: number;

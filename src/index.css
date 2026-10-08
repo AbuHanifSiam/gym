@@ -59,3 +59,14 @@
     scroll-behavior: auto !important;
   }
 }
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+@utility toast-in {
+  animation: toast-in 180ms ease-out;
+}

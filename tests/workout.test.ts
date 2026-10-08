@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 import type { PlanDay } from '../shared/schemas.js';
 import { addDays, displayToKg, kgToDisplay, localDay, weekdayOf } from '../shared/time.js';
 import {
+  addEntry,
   addSet,
   buildSession,
   completeSet,
   formatDuration,
   isLastOpenSet,
+  moveEntry,
+  removeEntry,
   removeLastSet,
+  replaceEntry,
   sessionStats,
 } from '../src/workout/session.js';
 
@@ -102,6 +106,43 @@ describe('workout session', () => {
     expect(isLastOpenSet(x, 1, 1)).toBe(true);
     expect(isLastOpenSet(x, 0, 0)).toBe(false);
     expect(sessionStats(x)).toMatchObject({ totalSets: 5, doneSets: 4, doneExercises: 1 });
+  });
+
+  it('reorders entries and ignores moves past either end', () => {
+    const ids = (x: typeof s) => x.entries.map((e) => e.exerciseId[0]);
+    expect(ids(moveEntry(s, 0, 1))).toEqual(['b', 'a']);
+    expect(ids(moveEntry(s, 1, -1))).toEqual(['b', 'a']);
+    expect(moveEntry(s, 0, -1)).toBe(s);
+    expect(moveEntry(s, 1, 1)).toBe(s);
+  });
+
+  it('skips an entry for today', () => {
+    const x = removeEntry(s, 0);
+    expect(x.entries.map((e) => e.exerciseId)).toEqual(['b'.repeat(24)]);
+    expect(s.entries).toHaveLength(2);
+  });
+
+  it('swaps an exercise, keeping the planned target when the kind matches', () => {
+    const logged = completeSet(s, 0, 0, undefined, false);
+    const x = replaceEntry(logged, 0, { id: 'c'.repeat(24), measure: 'reps' });
+    expect(x.entries[0]).toMatchObject({ exerciseId: 'c'.repeat(24), variationKey: '' });
+    expect(x.entries[0].target).toMatchObject({ sets: 3, repsMin: 10, repsMax: 12 });
+    expect(x.entries[0].sets).toHaveLength(3);
+    expect(x.entries[0].sets.every((y) => !y.done)).toBe(true);
+  });
+
+  it('gives sensible targets when swapping between timed and reps exercises', () => {
+    const toTimed = replaceEntry(s, 0, { id: 'c'.repeat(24), measure: 'time' });
+    expect(toTimed.entries[0].target).toMatchObject({ sets: 3, repsMax: null, durationSec: 30 });
+    const toReps = replaceEntry(s, 1, { id: 'c'.repeat(24), measure: 'reps' });
+    expect(toReps.entries[1].target).toMatchObject({ sets: 2, repsMin: 8, durationSec: null });
+  });
+
+  it('adds an extra exercise at the end', () => {
+    const x = addEntry(s, { id: 'd'.repeat(24), measure: 'reps' });
+    expect(x.entries).toHaveLength(3);
+    expect(x.entries[2]).toMatchObject({ exerciseId: 'd'.repeat(24) });
+    expect(x.entries[2].sets).toHaveLength(3);
   });
 
   it('formats durations', () => {

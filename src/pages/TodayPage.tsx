@@ -1,25 +1,34 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   orderedDays,
   weekdayNames,
+  type Exercise,
   type TodayResponse,
   type WorkoutSession,
 } from '../../shared/schemas';
 import { kgToDisplay } from '../../shared/time';
 import { useMe } from '../api/auth';
-import { useToday } from '../api/today';
+import { useLastPerformance, useToday } from '../api/today';
+import EntryActions from '../components/today/EntryActions';
 import ExerciseCard from '../components/today/ExerciseCard';
+import Toast, { type ToastMessage } from '../components/Toast';
+import ExercisePicker from '../components/today/ExercisePicker';
 import IntensityChip from '../components/IntensityChip';
 import { startRest, stopRest } from '../workout/restTimer';
 import {
+  addEntry,
   addSet,
   buildSession,
   completeSet,
   formatDuration,
   isLastOpenSet,
+  moveEntry,
+  newSessionId,
   patchSet,
+  removeEntry,
   removeLastSet,
+  replaceEntry,
   sessionStats,
   setVariation,
 } from '../workout/session';
@@ -163,7 +172,19 @@ function Workout({
   const [openIdx, setOpenIdx] = useState<number | null>(() =>
     session ? firstOpenEntry(session) : null,
   );
-  const exercises = new Map(today.exercises.map((e) => [e.id, e]));
+  // Today's list before Start, so exercises can be swapped, skipped or reordered first.
+  const [draft, setDraft] = useState<WorkoutSession | null>(() =>
+    today.day?.type === 'train'
+      ? buildSession({ planId: today.plan?.id ?? null, date: today.date, day: today.day })
+      : null,
+  );
+  const [editing, setEditing] = useState(false);
+  const [picker, setPicker] = useState<{ replaceIdx: number | null } | null>(null);
+  // Exercises picked today that the server didn't send with this day.
+  const [picked, setPicked] = useState<Exercise[]>([]);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+  const dismissToast = useCallback(() => setToast(null), []);
+  const exercises = new Map([...today.exercises, ...picked].map((e) => [e.id, e]));
   const listRef = useRef<HTMLOListElement>(null);
 
   function commit(next: WorkoutSession | null) {
@@ -175,6 +196,130 @@ function Workout({
     setSession(next);
   }
 
+  const current = session ?? draft;
+  const known = new Set(today.exercises.map((e) => e.id));
+  const newIds = [
+    ...new Set(current?.entries.map((e) => e.exerciseId).filter((id) => !known.has(id))),
+  ];
+  const { data: extraLast } = useLastPerformance(newIds, session?.id);
+  const last = { ...extraLast, ...today.last };
+
+  /**
+   * Applies a list change to the running workout, or to the draft before Start. With a
+   * message, confirms it in a toast that can undo the change.
+   */
+  function change(fn: (s: WorkoutSession) => WorkoutSession, message?: string) {
+    const running = ref.current != null;
+    const before = ref.current ?? draft;
+    if (!before) return;
+    if (running) commit(fn(before));
+    else setDraft(fn(before));
+    if (message) {
+      setToast({
+        id: (toast?.id ?? 0) + 1,
+        text: message,
+        onUndo: () => {
+          if (running) {
+            if (ref.current) commit({ ...before, finishedAt: ref.current.finishedAt });
+          } else setDraft(before);
+          setOpenIdx(null);
+        },
+      });
+    }
+  }
+
+  /** Asks before throwing away sets already logged for an entry. */
+  function okToDrop(ei: number, question: string) {
+    const logged = current!.entries[ei].sets.filter((x) => x.done).length;
+    if (logged === 0) return true;
+    return confirm(
+      `${question} The ${logged} set${logged > 1 ? 's' : ''} you logged will be removed.`,
+    );
+  }
+
+  function move(ei: number, dir: -1 | 1) {
+    change((s) => moveEntry(s, ei, dir));
+    if (openIdx === ei) setOpenIdx(ei + dir);
+    else if (openIdx === ei + dir) setOpenIdx(ei);
+  }
+
+  function skip(ei: number) {
+    const name = exercises.get(current!.entries[ei].exerciseId)?.name ?? 'this exercise';
+    if (!okToDrop(ei, `Skip ${name} today?`)) return;
+    change((s) => removeEntry(s, ei), `Skipped ${name} for today`);
+    if (openIdx === ei) setOpenIdx(null);
+    else if (openIdx != null && openIdx > ei) setOpenIdx(openIdx - 1);
+  }
+
+  function pick(ex: Exercise) {
+    const at = picker?.replaceIdx ?? null;
+    if (at != null && !okToDrop(at, `Swap to ${ex.name}?`)) return;
+    if (!known.has(ex.id)) setPicked((p) => [...p.filter((x) => x.id !== ex.id), ex]);
+    const was = at != null ? exercises.get(current!.entries[at].exerciseId)?.name : undefined;
+    change(
+      (s) => (at != null ? replaceEntry(s, at, ex) : addEntry(s, ex)),
+      at == null
+        ? `Added ${ex.name}`
+        : was
+          ? `Swapped ${was} for ${ex.name}`
+          : `Swapped in ${ex.name}`,
+    );
+    setPicker(null);
+  }
+
+  const pickerEl = picker && current && (
+    <ExercisePicker
+      title={picker.replaceIdx != null ? 'Swap exercise' : 'Add exercise'}
+      preferCategory={
+        picker.replaceIdx != null
+          ? exercises.get(current.entries[picker.replaceIdx]?.exerciseId)?.category
+          : undefined
+      }
+      inWorkout={new Set(current.entries.map((e) => e.exerciseId))}
+      onPick={pick}
+      onClose={() => setPicker(null)}
+    />
+  );
+
+  const actionsFor = (ei: number, count: number, name: string) => (
+    <EntryActions
+      name={name}
+      canMoveUp={ei > 0}
+      canMoveDown={ei < count - 1}
+      onMove={(dir) => move(ei, dir)}
+      onReplace={() => setPicker({ replaceIdx: ei })}
+      onSkip={() => skip(ei)}
+    />
+  );
+
+  const editBar = (
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-sm text-slate-500">
+        {editing ? 'Changes apply to today only. Your plan stays the same.' : ''}
+      </p>
+      <button
+        type="button"
+        className={`min-h-11 shrink-0 rounded-xl px-3 text-sm font-semibold ${
+          editing ? 'bg-emerald-700 text-white' : 'text-emerald-700 dark:text-emerald-400'
+        }`}
+        aria-pressed={editing}
+        onClick={() => setEditing((v) => !v)}
+      >
+        {editing ? 'Done' : '✎ Edit exercises'}
+      </button>
+    </div>
+  );
+
+  const addButton = (
+    <button
+      type="button"
+      className="btn-ghost w-full"
+      onClick={() => setPicker({ replaceIdx: null })}
+    >
+      + Add exercise
+    </button>
+  );
+
   // Scroll the newly opened exercise into view.
   useEffect(() => {
     if (openIdx == null) return;
@@ -183,7 +328,7 @@ function Workout({
   }, [openIdx]);
 
   if (!session) {
-    if (!today.day || today.day.type === 'rest') return <RestDay />;
+    if (!today.day || today.day.type === 'rest' || !draft) return <RestDay />;
     const day = today.day;
     return (
       <div className="space-y-4">
@@ -197,35 +342,53 @@ function Workout({
             </span>
           </div>
         )}
+        {editBar}
         <ol className="card space-y-1.5">
-          {day.items.map((item, i) => {
-            const ex = exercises.get(item.exerciseId);
-            const grip = ex?.variations.find((v) => v.key === item.variationKey);
+          {draft.entries.length === 0 && (
+            <li className="text-sm text-slate-500">No exercises today. Add one to start.</li>
+          )}
+          {draft.entries.map((entry, i) => {
+            const ex = exercises.get(entry.exerciseId);
+            const grip = ex?.variations.find((v) => v.key === entry.variationKey);
             return (
-              <li key={i} className="flex gap-3 text-sm">
-                <span className="w-5 shrink-0 text-right text-slate-500">{i + 1}.</span>
-                <span className="min-w-0 flex-1">
-                  {ex?.name ?? 'Unknown'}
-                  {grip && (
-                    <span className="text-emerald-700 dark:text-emerald-400"> · {grip.name}</span>
-                  )}
-                </span>
+              <li
+                key={`${i}-${entry.exerciseId}`}
+                className={
+                  editing
+                    ? 'space-y-2 border-b border-slate-200 pb-3 last:border-0 last:pb-0 dark:border-slate-800'
+                    : ''
+                }
+              >
+                <div className="flex gap-3 text-sm">
+                  <span className="w-5 shrink-0 text-right text-slate-500">{i + 1}.</span>
+                  <span className="min-w-0 flex-1">
+                    {ex?.name ?? 'Unknown'}
+                    {grip && (
+                      <span className="text-emerald-700 dark:text-emerald-400"> · {grip.name}</span>
+                    )}
+                  </span>
+                </div>
+                {editing && actionsFor(i, draft.entries.length, ex?.name ?? 'exercise')}
               </li>
             );
           })}
         </ol>
+        {editing && addButton}
         <button
           type="button"
           className="btn-primary min-h-16 w-full text-lg"
-          disabled={day.items.length === 0}
+          disabled={draft.entries.length === 0}
           onClick={() => {
-            const s = buildSession({ planId: today.plan?.id ?? null, date: today.date, day });
-            commit({ ...s, rev: 0 });
+            const now = new Date().toISOString();
+            commit({ ...draft, id: newSessionId(), startedAt: now, updatedAt: now, rev: 0 });
+            setEditing(false);
             setOpenIdx(0);
           }}
         >
           Start workout
         </button>
+        {pickerEl}
+        <Toast message={toast} onDismiss={dismissToast} />
       </div>
     );
   }
@@ -244,7 +407,7 @@ function Workout({
       return;
     }
     const lastOne = isLastOpenSet(s, ei, si);
-    const next = completeSet(s, ei, si, today.last[s.entries[ei].exerciseId], timed);
+    const next = completeSet(s, ei, si, last[s.entries[ei].exerciseId], timed);
     commit(next);
     if (!finished && !lastOne) startRest(ex?.heavyRest ? restHeavy : restDefault);
     if (lastOne) stopRest();
@@ -300,14 +463,16 @@ function Workout({
         </div>
       )}
 
+      {!finished && editBar}
+
       <ol ref={listRef} className="space-y-2">
         {session.entries.map((entry, ei) => (
           <ExerciseCard
-            key={ei}
+            key={`${ei}-${entry.exerciseId}`}
             index={ei}
             entry={entry}
             exercise={exercises.get(entry.exerciseId)}
-            last={today.last[entry.exerciseId]}
+            last={last[entry.exerciseId]}
             units={units}
             open={openIdx === ei}
             onToggleOpen={() => setOpenIdx(openIdx === ei ? null : ei)}
@@ -316,9 +481,22 @@ function Workout({
             onAddSet={() => commit(addSet(ref.current!, ei))}
             onRemoveSet={() => commit(removeLastSet(ref.current!, ei))}
             onVariation={(key) => commit(setVariation(ref.current!, ei, key))}
+            actions={
+              editing && !finished
+                ? actionsFor(
+                    ei,
+                    session.entries.length,
+                    exercises.get(entry.exerciseId)?.name ?? 'exercise',
+                  )
+                : undefined
+            }
           />
         ))}
       </ol>
+
+      {editing && !finished && addButton}
+      {pickerEl}
+      <Toast message={toast} onDismiss={dismissToast} />
 
       {!finished && (
         <button type="button" className="btn-primary min-h-16 w-full text-lg" onClick={finish}>

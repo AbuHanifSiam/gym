@@ -1,4 +1,5 @@
 import type { Types } from 'mongoose';
+import { z } from 'zod';
 import {
   sessionIdSchema,
   sessionInputSchema,
@@ -89,7 +90,29 @@ export async function lastPerformances(
   return out;
 }
 
+const lastQuerySchema = z.object({
+  ids: z
+    .string()
+    .max(2000)
+    .transform((v) => [...new Set(v.split(',').filter(Boolean))])
+    .pipe(z.array(z.string().regex(/^[a-f0-9]{24}$/)).max(60)),
+  exclude: sessionIdSchema.optional(),
+});
+
 export const sessionRoutes: Route[] = [
+  {
+    // "Last time" numbers for exercises swapped into or added to today's workout.
+    method: 'GET',
+    path: '/last-performance',
+    handler: async (req, res) => {
+      const userId = requireUserId(req);
+      const { ids, exclude } = parse(lastQuerySchema, {
+        ids: req.query.ids ?? '',
+        exclude: req.query.exclude,
+      });
+      res.json({ last: await lastPerformances(userId, ids, exclude) });
+    },
+  },
   {
     method: 'GET',
     path: '/sessions/:id',
