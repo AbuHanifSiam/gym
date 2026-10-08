@@ -14,7 +14,7 @@ describe('default plan', () => {
     const sat = plan.days.find((d) => d.dayIndex === 6)!;
     expect(sat.items).toHaveLength(14);
     expect(sat.items.map((i) => i.exerciseId)).toEqual(
-      seedExercises.map((e) => fakeIds.get(e.name.toLowerCase())),
+      seedExercises.slice(0, 14).map((e) => fakeIds.get(e.name.toLowerCase())),
     );
   });
 

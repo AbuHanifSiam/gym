@@ -1,13 +1,27 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { categories } from '../../shared/schemas';
 import { useExercises, useSeedExercises } from '../api/exercises';
 
 export default function ExercisesPage() {
   const { data: exercises, isPending, isError } = useExercises();
   const seed = useSeedExercises();
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState<string>('all');
+  // Filters live in the URL so they survive navigating to an exercise and back.
+  const [params, setParams] = useSearchParams();
+  const query = params.get('q') ?? '';
+  const category = params.get('cat') ?? 'all';
+  const setParam = (key: string, value: string, empty: string) =>
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value === empty) next.delete(key);
+        else next.set(key, value);
+        return next;
+      },
+      { replace: true },
+    );
+  const setQuery = (v: string) => setParam('q', v, '');
+  const setCategory = (v: string) => setParam('cat', v, 'all');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
