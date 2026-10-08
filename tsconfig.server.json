@@ -20,6 +20,7 @@
     "scripts",
     "tests",
     "vite.config.ts",
+    "vite.api-dev.ts",
     "vitest.config.ts",
     "eslint.config.js"
   ]

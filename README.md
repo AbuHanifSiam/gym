@@ -74,7 +74,7 @@ npm run dev:full             # UI + API at http://localhost:3000
 
 | Script           | Does                                                 |
 | ---------------- | ---------------------------------------------------- |
-| `npm run dev`    | UI only (no API)                                     |
+| `npm run dev`    | UI + API at http://localhost:5173 (reads `.env`)     |
 | `npm run check`  | lint + typecheck + tests + formatting (what CI runs) |
 | `npm test`       | Vitest                                               |
 | `npm run build`  | Production build (includes the service worker)       |
