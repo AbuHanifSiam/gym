@@ -141,7 +141,7 @@ export default function DayEditor({
                         ? v === 'hard'
                           ? 'bg-orange-500 text-white'
                           : 'bg-sky-600 text-white'
-                        : 'ring-1 ring-slate-300 dark:ring-slate-700'
+                        : 'ring-1 ring-inset ring-slate-300 dark:ring-slate-700'
                     }`}
                     onClick={() => onChange({ ...day, intensity: v })}
                   >

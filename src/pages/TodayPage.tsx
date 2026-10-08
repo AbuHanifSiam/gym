@@ -107,7 +107,7 @@ function DayPicker({
 }) {
   return (
     <div
-      className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1"
+      className="-mx-4 flex gap-1.5 overflow-x-auto px-4 py-1"
       role="group"
       aria-label="Pick a day"
     >
@@ -122,7 +122,7 @@ function DayPicker({
             className={`relative flex min-h-14 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl px-2 text-xs font-semibold ${
               active
                 ? 'bg-emerald-700 text-white'
-                : 'bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800'
+                : 'bg-white ring-1 ring-inset ring-slate-200 dark:bg-slate-900 dark:ring-slate-800'
             }`}
           >
             <span>{weekdayNames[d.dayIndex].slice(0, 3)}</span>

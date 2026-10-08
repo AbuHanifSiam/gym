@@ -75,7 +75,7 @@ export default function BodyPage() {
         <section className="card space-y-3" aria-labelledby="body-chart">
           {available.length > 1 && (
             <div
-              className="-mx-1 flex gap-1.5 overflow-x-auto px-1"
+              className="-mx-1 flex gap-1.5 overflow-x-auto p-1"
               role="group"
               aria-label="Measurement"
             >
@@ -88,7 +88,7 @@ export default function BodyPage() {
                   className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-medium ${
                     m === metric
                       ? 'bg-emerald-700 text-white'
-                      : 'ring-1 ring-slate-300 dark:ring-slate-700'
+                      : 'ring-1 ring-inset ring-slate-300 dark:ring-slate-700'
                   }`}
                 >
                   {labels[m]}

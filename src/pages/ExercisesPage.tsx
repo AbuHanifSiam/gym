@@ -41,7 +41,7 @@ export default function ExercisesPage() {
       </label>
 
       <div
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1"
+        className="-mx-4 flex gap-2 overflow-x-auto px-4 py-1"
         role="group"
         aria-label="Category"
       >
@@ -54,7 +54,7 @@ export default function ExercisesPage() {
             className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-medium capitalize ${
               category === c
                 ? 'bg-emerald-700 text-white'
-                : 'bg-white ring-1 ring-slate-300 dark:bg-slate-900 dark:ring-slate-700'
+                : 'bg-white ring-1 ring-inset ring-slate-300 dark:bg-slate-900 dark:ring-slate-700'
             }`}
           >
             {c}
