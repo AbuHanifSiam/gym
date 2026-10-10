@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   Plan,
   PlanInput,
+  PlanItem,
   PlanSummary,
   PublicUser,
   SettingsUpdate,
@@ -49,6 +50,15 @@ export const useCreateDefaultPlan = () =>
 export const useSavePlan = () =>
   usePlanMutation(({ id, input }: { id: string; input: PlanInput }) =>
     api<{ plan: Plan }>(`/plans/${id}`, { method: 'PUT', body: input }),
+  );
+
+/** Saves one day's exercises (in order) to the signed-in user's own plan. */
+export const useSaveDayItems = () =>
+  usePlanMutation(({ id, dayIndex, items }: { id: string; dayIndex: number; items: PlanItem[] }) =>
+    api<{ plan: Plan }>(`/plans/${id}/days/${dayIndex}/items`, {
+      method: 'PUT',
+      body: { items },
+    }),
   );
 
 export const useDuplicatePlan = () =>

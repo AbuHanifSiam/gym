@@ -8,7 +8,9 @@ import {
   completeSet,
   formatDuration,
   isLastOpenSet,
+  entriesToPlanItems,
   moveEntry,
+  reorderEntry,
   removeEntry,
   removeLastSet,
   replaceEntry,
@@ -114,6 +116,22 @@ describe('workout session', () => {
     expect(ids(moveEntry(s, 1, -1))).toEqual(['b', 'a']);
     expect(moveEntry(s, 0, -1)).toBe(s);
     expect(moveEntry(s, 1, 1)).toBe(s);
+  });
+
+  it('drags an entry to any position', () => {
+    const three = addEntry(s, { id: 'c'.repeat(24), measure: 'reps' });
+    const ids = (x: typeof s) => x.entries.map((e) => e.exerciseId[0]);
+    expect(ids(reorderEntry(three, 0, 2))).toEqual(['b', 'c', 'a']);
+    expect(ids(reorderEntry(three, 2, 0))).toEqual(['c', 'a', 'b']);
+    expect(reorderEntry(three, 1, 1)).toBe(three);
+    expect(reorderEntry(three, 0, 5)).toBe(three);
+  });
+
+  it('turns the current list back into plan items, in order', () => {
+    const x = reorderEntry(addEntry(s, { id: 'c'.repeat(24), measure: 'reps' }), 2, 0);
+    const items = entriesToPlanItems(x);
+    expect(items.map((i) => i.exerciseId[0])).toEqual(['c', 'a', 'b']);
+    expect(items[1]).toMatchObject({ sets: 3, repsMin: 10, repsMax: 12 });
   });
 
   it('skips an entry for today', () => {

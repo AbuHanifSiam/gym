@@ -11,7 +11,9 @@ import { kgToDisplay } from '../../shared/time';
 import { useMe } from '../api/auth';
 import { useLastPerformance, useToday } from '../api/today';
 import EntryActions from '../components/today/EntryActions';
-import ExerciseCard from '../components/today/ExerciseCard';
+import ExerciseCard, { targetText } from '../components/today/ExerciseCard';
+import SortableEntries, { type EntryRow } from '../components/today/SortableEntries';
+import { useSaveDayItems } from '../api/plans';
 import Toast, { type ToastMessage } from '../components/Toast';
 import ExercisePicker from '../components/today/ExercisePicker';
 import IntensityChip from '../components/IntensityChip';
@@ -21,6 +23,7 @@ import {
   addSet,
   buildSession,
   completeSet,
+  entriesToPlanItems,
   formatDuration,
   isLastOpenSet,
   moveEntry,
@@ -28,6 +31,7 @@ import {
   patchSet,
   removeEntry,
   removeLastSet,
+  reorderEntry,
   replaceEntry,
   sessionStats,
   setVariation,
@@ -212,6 +216,7 @@ function Workout({
     const running = ref.current != null;
     const before = ref.current ?? draft;
     if (!before) return;
+    setPlanSaved(false);
     if (running) commit(fn(before));
     else setDraft(fn(before));
     if (message) {
@@ -241,6 +246,29 @@ function Workout({
     change((s) => moveEntry(s, ei, dir));
     if (openIdx === ei) setOpenIdx(ei + dir);
     else if (openIdx === ei + dir) setOpenIdx(ei);
+  }
+
+  function reorder(from: number, to: number) {
+    change((s) => reorderEntry(s, from, to));
+    setOpenIdx(null);
+  }
+
+  const savePlan = useSaveDayItems();
+  const [planSaved, setPlanSaved] = useState(false);
+  async function saveToPlan() {
+    const planId = today.plan?.id;
+    if (!planId || !current) return;
+    try {
+      await savePlan.mutateAsync({
+        id: planId,
+        dayIndex: today.dayIndex,
+        items: entriesToPlanItems(current),
+      });
+      setPlanSaved(true);
+      setToast({ id: (toast?.id ?? 0) + 1, text: 'Saved to your plan' });
+    } catch {
+      setToast({ id: (toast?.id ?? 0) + 1, text: 'Could not save to your plan. Try again.' });
+    }
   }
 
   function skip(ei: number) {
@@ -292,21 +320,51 @@ function Workout({
     />
   );
 
+  const rowsFor = (s: WorkoutSession): EntryRow[] =>
+    s.entries.map((entry, i) => {
+      const ex = exercises.get(entry.exerciseId);
+      const grip = ex?.variations.find((v) => v.key === entry.variationKey);
+      const timed = ex?.measure === 'time' || entry.target.durationSec != null;
+      return {
+        name: ex?.name ?? 'Unknown exercise',
+        detail: `${entry.sets.length} × ${targetText(entry.target, timed)}${grip ? ` · ${grip.name}` : ''}`,
+        actions: actionsFor(i, s.entries.length, ex?.name ?? 'exercise'),
+      };
+    });
+
   const editBar = (
-    <div className="flex items-center justify-between gap-3">
-      <p className="text-sm text-slate-500">
-        {editing ? 'Changes apply to today only. Your plan stays the same.' : ''}
-      </p>
-      <button
-        type="button"
-        className={`min-h-11 shrink-0 rounded-xl px-3 text-sm font-semibold ${
-          editing ? 'bg-emerald-700 text-white' : 'text-emerald-700 dark:text-emerald-400'
-        }`}
-        aria-pressed={editing}
-        onClick={() => setEditing((v) => !v)}
-      >
-        {editing ? 'Done' : '✎ Edit exercises'}
-      </button>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-slate-500">
+          {editing
+            ? 'Drag ⠿ to reorder. Changes are for today unless you save them to your plan.'
+            : ''}
+        </p>
+        <button
+          type="button"
+          className={`min-h-11 shrink-0 rounded-xl px-3 text-sm font-semibold ${
+            editing ? 'bg-emerald-700 text-white' : 'text-emerald-700 dark:text-emerald-400'
+          }`}
+          aria-pressed={editing}
+          onClick={() => setEditing((v) => !v)}
+        >
+          {editing ? 'Done' : '✎ Edit exercises'}
+        </button>
+      </div>
+      {editing && today.plan && (
+        <button
+          type="button"
+          className="btn-ghost w-full"
+          disabled={savePlan.isPending}
+          onClick={saveToPlan}
+        >
+          {savePlan.isPending
+            ? 'Saving…'
+            : planSaved
+              ? '✓ Saved to plan · save again'
+              : `Save this list to my plan (${weekdayNames[today.dayIndex]})`}
+        </button>
+      )}
     </div>
   );
 
@@ -343,23 +401,18 @@ function Workout({
           </div>
         )}
         {editBar}
-        <ol className="card space-y-1.5">
-          {draft.entries.length === 0 && (
-            <li className="text-sm text-slate-500">No exercises today. Add one to start.</li>
-          )}
-          {draft.entries.map((entry, i) => {
-            const ex = exercises.get(entry.exerciseId);
-            const grip = ex?.variations.find((v) => v.key === entry.variationKey);
-            return (
-              <li
-                key={`${i}-${entry.exerciseId}`}
-                className={
-                  editing
-                    ? 'space-y-2 border-b border-slate-200 pb-3 last:border-0 last:pb-0 dark:border-slate-800'
-                    : ''
-                }
-              >
-                <div className="flex gap-3 text-sm">
+        {editing ? (
+          <SortableEntries rows={rowsFor(draft)} onReorder={reorder} />
+        ) : (
+          <ol className="card space-y-1.5">
+            {draft.entries.length === 0 && (
+              <li className="text-sm text-slate-500">No exercises today. Add one to start.</li>
+            )}
+            {draft.entries.map((entry, i) => {
+              const ex = exercises.get(entry.exerciseId);
+              const grip = ex?.variations.find((v) => v.key === entry.variationKey);
+              return (
+                <li key={`${i}-${entry.exerciseId}`} className="flex gap-3 text-sm">
                   <span className="w-5 shrink-0 text-right text-slate-500">{i + 1}.</span>
                   <span className="min-w-0 flex-1">
                     {ex?.name ?? 'Unknown'}
@@ -367,12 +420,11 @@ function Workout({
                       <span className="text-emerald-700 dark:text-emerald-400"> · {grip.name}</span>
                     )}
                   </span>
-                </div>
-                {editing && actionsFor(i, draft.entries.length, ex?.name ?? 'exercise')}
-              </li>
-            );
-          })}
-        </ol>
+                </li>
+              );
+            })}
+          </ol>
+        )}
         {editing && addButton}
         <button
           type="button"
@@ -465,34 +517,38 @@ function Workout({
 
       {!finished && editBar}
 
-      <ol ref={listRef} className="space-y-2">
-        {session.entries.map((entry, ei) => (
-          <ExerciseCard
-            key={`${ei}-${entry.exerciseId}`}
-            index={ei}
-            entry={entry}
-            exercise={exercises.get(entry.exerciseId)}
-            last={last[entry.exerciseId]}
-            units={units}
-            open={openIdx === ei}
-            onToggleOpen={() => setOpenIdx(openIdx === ei ? null : ei)}
-            onSetChange={(si, patch) => commit(patchSet(ref.current!, ei, si, patch))}
-            onSetToggle={(si) => toggleSet(ei, si)}
-            onAddSet={() => commit(addSet(ref.current!, ei))}
-            onRemoveSet={() => commit(removeLastSet(ref.current!, ei))}
-            onVariation={(key) => commit(setVariation(ref.current!, ei, key))}
-            actions={
-              editing && !finished
-                ? actionsFor(
-                    ei,
-                    session.entries.length,
-                    exercises.get(entry.exerciseId)?.name ?? 'exercise',
-                  )
-                : undefined
-            }
-          />
-        ))}
-      </ol>
+      {editing && !finished ? (
+        <SortableEntries rows={rowsFor(session)} onReorder={reorder} />
+      ) : (
+        <ol ref={listRef} className="space-y-2">
+          {session.entries.map((entry, ei) => (
+            <ExerciseCard
+              key={`${ei}-${entry.exerciseId}`}
+              index={ei}
+              entry={entry}
+              exercise={exercises.get(entry.exerciseId)}
+              last={last[entry.exerciseId]}
+              units={units}
+              open={openIdx === ei}
+              onToggleOpen={() => setOpenIdx(openIdx === ei ? null : ei)}
+              onSetChange={(si, patch) => commit(patchSet(ref.current!, ei, si, patch))}
+              onSetToggle={(si) => toggleSet(ei, si)}
+              onAddSet={() => commit(addSet(ref.current!, ei))}
+              onRemoveSet={() => commit(removeLastSet(ref.current!, ei))}
+              onVariation={(key) => commit(setVariation(ref.current!, ei, key))}
+              actions={
+                editing && !finished
+                  ? actionsFor(
+                      ei,
+                      session.entries.length,
+                      exercises.get(entry.exerciseId)?.name ?? 'exercise',
+                    )
+                  : undefined
+              }
+            />
+          ))}
+        </ol>
+      )}
 
       {editing && !finished && addButton}
       {pickerEl}

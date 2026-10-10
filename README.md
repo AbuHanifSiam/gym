@@ -2,7 +2,7 @@
 
 A mobile-first personal workout app. Build a weekly plan, follow today's workout as a checklist at the gym, log every set, and track progress and body measurements over time. It works offline and installs to your phone's home screen.
 
-**Live:** https://gym-zeta-gules.vercel.app
+**Live:** https://www.gymtracker.website
 
 ## Features
 

@@ -184,6 +184,9 @@ export const planDaySchema = z
   );
 export type PlanDay = z.infer<typeof planDaySchema>;
 
+/** Body for saving one day's exercise list, in order. */
+export const dayItemsSchema = z.object({ items: z.array(planItemSchema).max(40) });
+
 export const planInputSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(60),
   days: z

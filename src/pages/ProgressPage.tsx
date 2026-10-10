@@ -58,27 +58,28 @@ function shiftMonth(month: string, delta: number): string {
   return d.toISOString().slice(0, 7);
 }
 
-const statusStyle: Record<DayStatus, { cls: string; mark: string; label: string; text?: string }> = {
-  trained: { cls: 'bg-emerald-700 text-white', mark: '✓', label: 'Trained', text: 'Training' },
-  missed: {
-    cls: 'bg-red-50 text-red-700 ring-1 ring-red-300 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900',
-    mark: '✕',
-    label: 'Missed',
-    text: 'Missed',
-  },
-  rest: {
-    cls: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
-    mark: '·',
-    label: 'Rest',
-    text: 'Rest',
-  },
-  planned: {
-    cls: 'border border-dashed border-slate-400 text-slate-600 dark:text-slate-300',
-    mark: '',
-    label: 'Planned',
-  },
-  none: { cls: 'text-slate-500', mark: '', label: '' },
-};
+const statusStyle: Record<DayStatus, { cls: string; mark: string; label: string; text?: string }> =
+  {
+    trained: { cls: 'bg-emerald-700 text-white', mark: '✓', label: 'Trained', text: 'Training' },
+    missed: {
+      cls: 'bg-red-50 text-red-700 ring-1 ring-red-300 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900',
+      mark: '✕',
+      label: 'Missed',
+      text: 'Missed',
+    },
+    rest: {
+      cls: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+      mark: '·',
+      label: 'Rest',
+      text: 'Rest',
+    },
+    planned: {
+      cls: 'border border-dashed border-slate-400 text-slate-600 dark:text-slate-300',
+      mark: '',
+      label: 'Planned',
+    },
+    none: { cls: 'text-slate-500', mark: '', label: '' },
+  };
 
 function Overview() {
   const [month, setMonth] = useState<string | null>(null);
@@ -159,7 +160,10 @@ function Overview() {
               >
                 <span>{Number(d.slice(8))}</span>
                 {st.text && (
-                  <span aria-hidden className="max-w-full truncate px-0.5 text-[8px] leading-none font-medium sm:text-[10px]">
+                  <span
+                    aria-hidden
+                    className="max-w-full truncate px-0.5 text-[8px] leading-none font-medium sm:text-[10px]"
+                  >
                     {st.text}
                   </span>
                 )}

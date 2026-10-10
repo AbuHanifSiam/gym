@@ -1,5 +1,6 @@
 import mongoose, { type Types } from 'mongoose';
 import {
+  dayItemsSchema,
   planInputSchema,
   type Plan,
   type PlanInput,
@@ -144,6 +145,33 @@ export const planRoutes: Route[] = [
         returnDocument: 'after',
         runValidators: true,
       }).lean<Lean>();
+      if (!p) throw new ApiError(404, 'not_found', 'Plan not found');
+      res.json({ plan: toPlan(p) });
+    },
+  },
+  {
+    // Replaces one day's exercise list (and its order) without touching the rest of the plan.
+    method: 'PUT',
+    path: '/plans/:id/days/:dayIndex/items',
+    handler: async (req, res, { id, dayIndex }) => {
+      const userId = requireUserId(req);
+      const day = Number(dayIndex);
+      if (!Number.isInteger(day) || day < 0 || day > 6)
+        throw new ApiError(404, 'not_found', 'Day not found');
+      const { items } = parse(dayItemsSchema, req.body);
+      await assertExercisesOwned(userId, {
+        name: '-',
+        days: [{ dayIndex: day, label: '', type: 'train', intensity: null, items }],
+      });
+      const p = await PlanModel.findOneAndUpdate(
+        { _id: planId(id), userId },
+        { $set: { 'days.$[d].items': items } },
+        {
+          arrayFilters: [{ 'd.dayIndex': day, 'd.type': 'train' }],
+          returnDocument: 'after',
+          runValidators: true,
+        },
+      ).lean<Lean>();
       if (!p) throw new ApiError(404, 'not_found', 'Plan not found');
       res.json({ plan: toPlan(p) });
     },

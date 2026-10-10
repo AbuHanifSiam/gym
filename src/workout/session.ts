@@ -1,6 +1,7 @@
 import type {
   LastPerformance,
   PlanDay,
+  PlanItem,
   SessionEntry,
   SessionSet,
   WorkoutSession,
@@ -129,6 +130,28 @@ export function moveEntry(s: WorkoutSession, entryIdx: number, dir: -1 | 1): Wor
   const entries = [...s.entries];
   [entries[entryIdx], entries[to]] = [entries[to], entries[entryIdx]];
   return { ...s, entries };
+}
+
+/** Moves an entry to any position (drag and drop). */
+export function reorderEntry(s: WorkoutSession, from: number, to: number): WorkoutSession {
+  const n = s.entries.length;
+  if (from === to || from < 0 || to < 0 || from >= n || to >= n) return s;
+  const entries = [...s.entries];
+  entries.splice(to, 0, entries.splice(from, 1)[0]);
+  return { ...s, entries };
+}
+
+/** The plan items for this workout's exercises, in their current order. */
+export function entriesToPlanItems(s: WorkoutSession): PlanItem[] {
+  return s.entries.map((e) => ({
+    exerciseId: e.exerciseId,
+    sets: Math.min(20, Math.max(1, e.target.sets)),
+    repsMin: e.target.repsMin,
+    repsMax: e.target.repsMax,
+    durationSec: e.target.durationSec,
+    variationKey: e.variationKey,
+    notes: e.target.notes,
+  }));
 }
 
 /** Skips an exercise for today: drops it from the workout, along with any sets logged. */
