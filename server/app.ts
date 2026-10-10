@@ -6,6 +6,7 @@ import { bodyRoutes } from './routes/body.js';
 import { exerciseRoutes } from './routes/exercises.js';
 import { exportRoutes } from './routes/export.js';
 import { healthRoutes } from './routes/health.js';
+import { nutritionRoutes } from './routes/nutrition.js';
 import { planRoutes } from './routes/plans.js';
 import { progressRoutes } from './routes/progress.js';
 import { sessionRoutes } from './routes/sessions.js';
@@ -22,6 +23,7 @@ export const routes: Route[] = [
   ...sessionRoutes,
   ...progressRoutes,
   ...bodyRoutes,
+  ...nutritionRoutes,
   ...exportRoutes,
 ];
 

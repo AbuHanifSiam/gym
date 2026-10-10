@@ -7,6 +7,7 @@ const tabs = [
   { to: '/plan', label: 'Plan', icon: '🗓️' },
   { to: '/progress', label: 'Progress', icon: '📈' },
   { to: '/body', label: 'Body', icon: '⚖️' },
+  { to: '/food', label: 'Food', icon: '🍽️' },
   { to: '/settings', label: 'More', icon: '⋯' },
 ];
 
@@ -16,6 +17,7 @@ const titles: [RegExp, string][] = [
   [/^\/exercises/, 'Exercises'],
   [/^\/progress/, 'Progress'],
   [/^\/body/, 'Body'],
+  [/^\/food/, 'Food'],
   [/^\/settings/, 'Settings'],
 ];
 
@@ -42,7 +44,7 @@ export default function Layout() {
         aria-label="Main"
         className="fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/95"
       >
-        <ul className="mx-auto grid max-w-xl grid-cols-5">
+        <ul className="mx-auto grid max-w-xl grid-cols-6">
           {tabs.map((t) => (
             <li key={t.to}>
               <NavLink

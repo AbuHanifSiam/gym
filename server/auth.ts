@@ -64,10 +64,18 @@ export async function requireUser(req: VercelRequest): Promise<UserDocument> {
 
 export function toPublicUser(user: UserDocument): PublicUser {
   const { timezone, weekStartDay, units, restTimerDefault, restTimerHeavy, theme } = user.settings;
+  const p = user.profile;
   return {
     id: String(user._id),
     email: user.email,
     name: user.name,
     settings: { timezone, weekStartDay, units, restTimerDefault, restTimerHeavy, theme },
+    profile: {
+      sex: p?.sex ?? null,
+      heightCm: p?.heightCm ?? null,
+      birthDate: p?.birthDate ?? null,
+      activity: p?.activity ?? 'light',
+      goal: p?.goal ?? 'maintain',
+    },
   };
 }

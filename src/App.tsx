@@ -10,6 +10,7 @@ import TodayPage from './pages/TodayPage';
 const BodyPage = lazy(() => import('./pages/BodyPage'));
 const ExerciseDetailPage = lazy(() => import('./pages/ExerciseDetailPage'));
 const ExerciseFormPage = lazy(() => import('./pages/ExerciseFormPage'));
+const FoodPage = lazy(() => import('./pages/FoodPage'));
 const ExercisesPage = lazy(() => import('./pages/ExercisesPage'));
 const PlanBuilderPage = lazy(() => import('./pages/PlanBuilderPage'));
 const PlansPage = lazy(() => import('./pages/PlansPage'));
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/progress/exercise/:id" element={<ExerciseProgressPage />} />
           <Route path="/progress/session/:id" element={<SessionDetailPage />} />
           <Route path="/body" element={<BodyPage />} />
+          <Route path="/food" element={<FoodPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Route>

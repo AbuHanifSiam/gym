@@ -1,4 +1,14 @@
 import { z } from 'zod';
+import {
+  activityLevels,
+  goals,
+  sexes,
+  type ActivityLevel,
+  type Goal,
+  type Sex,
+} from './nutrition.js';
+
+export const meals = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
 
 export const registerSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(60),
@@ -31,6 +41,7 @@ export interface PublicUser {
   email: string;
   name: string;
   settings: UserSettings;
+  profile: UserProfile;
 }
 
 export interface ApiErrorBody {
@@ -375,4 +386,78 @@ export type BodyLogInput = z.infer<typeof bodyLogInputSchema>;
 
 export interface BodyLog extends BodyLogInput {
   id: string;
+}
+
+// ---------- Nutrition ----------
+
+export const profileUpdateSchema = z
+  .object({
+    sex: z.enum(sexes).nullable(),
+    heightCm: z
+      .number()
+      .min(100, 'Height looks too short')
+      .max(250, 'Height looks too tall')
+      .nullable(),
+    birthDate: dateString.nullable(),
+    activity: z.enum(activityLevels),
+    goal: z.enum(goals),
+  })
+  .partial();
+export type ProfileUpdate = z.infer<typeof profileUpdateSchema>;
+
+export interface UserProfile {
+  sex: Sex | null;
+  heightCm: number | null;
+  birthDate: string | null;
+  activity: ActivityLevel;
+  /** Used only when BMI is in the healthy range. */
+  goal: Goal;
+}
+
+const per100 = (max: number) => z.number().min(0).max(max).nullable().default(null);
+
+export const customFoodSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required').max(80),
+  kcal: z.number().min(0).max(900),
+  protein: per100(100),
+  fat: per100(100),
+  carbs: per100(100),
+  fibre: per100(100),
+  portions: z
+    .array(
+      z.object({
+        label: z.string().trim().min(1).max(40),
+        grams: z.number().positive().max(5000),
+      }),
+    )
+    .max(5)
+    .default([]),
+});
+export type CustomFoodInput = z.infer<typeof customFoodSchema>;
+
+export const foodIdSchema = z.string().regex(/^(bd-\d\d_\d{4}|usda-\d+|[a-f0-9]{24})$/);
+
+export const foodLogInputSchema = z.object({
+  date: dateString,
+  foodId: foodIdSchema,
+  grams: z.number().positive('Enter an amount').max(5000),
+  /** Portion name shown in the log, e.g. "2 × 1 cup". */
+  portion: z.string().trim().max(60).default(''),
+  meal: z.enum(meals).default('snack'),
+});
+export type FoodLogInput = z.infer<typeof foodLogInputSchema>;
+
+export interface FoodLogEntry {
+  id: string;
+  date: string;
+  meal: (typeof meals)[number];
+  foodId: string;
+  name: string;
+  portion: string;
+  grams: number;
+  /** Snapshot when added, so later food edits don't change past days. */
+  kcal: number;
+  protein: number | null;
+  fat: number | null;
+  carbs: number | null;
 }

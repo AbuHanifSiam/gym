@@ -16,6 +16,7 @@ import {
 import { useMe } from '../api/auth';
 import { useBodyLogs, useDeleteBodyLog, useSaveBodyLog } from '../api/body';
 import { ApiError } from '../api/client';
+import CalorieCard from '../components/nutrition/CalorieCard';
 import TrendChart, { shortDate } from '../components/TrendChart';
 
 type Units = 'kg' | 'lb';
@@ -60,6 +61,8 @@ export default function BodyPage() {
       <h1 className="text-2xl font-bold">Body</h1>
 
       <WeightStats logs={logs} units={units} today={today} />
+
+      <CalorieCard />
 
       <EntryForm
         key={formDate + (logs.find((l) => l.date === formDate)?.id ?? '')}
