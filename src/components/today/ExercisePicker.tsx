@@ -11,6 +11,7 @@ export default function ExercisePicker({
   preferCategory,
   inWorkout,
   onPick,
+  onPickMany,
   onClose,
 }: {
   title: string;
@@ -18,12 +19,18 @@ export default function ExercisePicker({
   /** Exercise ids already in today's workout, marked in the list. */
   inWorkout: Set<string>;
   onPick: (exercise: Exercise) => void;
+  /** When set, tapping toggles selection and a footer button adds them all at once. */
+  onPickMany?: (exercises: Exercise[]) => void;
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const { data, isPending, isError } = useExercises();
   const [q, setQ] = useState('');
   const [category, setCategory] = useState<string>(preferCategory ?? 'all');
+  const [selected, setSelected] = useState<Exercise[]>([]);
+  const isSelected = (id: string) => selected.some((x) => x.id === id);
+  const toggle = (e: Exercise) =>
+    setSelected((s) => (s.some((x) => x.id === e.id) ? s.filter((x) => x.id !== e.id) : [...s, e]));
 
   useEffect(() => {
     ref.current?.showModal();
@@ -97,9 +104,24 @@ export default function ExercisePicker({
             <li key={e.id}>
               <button
                 type="button"
-                className="card flex min-h-14 w-full items-center gap-3 py-2 text-left"
-                onClick={() => onPick(e)}
+                className={`card flex min-h-14 w-full items-center gap-3 py-2 text-left ${
+                  isSelected(e.id) ? 'ring-2 ring-emerald-600' : ''
+                }`}
+                aria-pressed={onPickMany ? isSelected(e.id) : undefined}
+                onClick={() => (onPickMany ? toggle(e) : onPick(e))}
               >
+                {onPickMany && (
+                  <span
+                    aria-hidden
+                    className={`flex size-6 shrink-0 items-center justify-center rounded-md text-sm font-bold ${
+                      isSelected(e.id)
+                        ? 'bg-emerald-700 text-white'
+                        : 'ring-1 ring-inset ring-slate-400 dark:ring-slate-600'
+                    }`}
+                  >
+                    {isSelected(e.id) && '✓'}
+                  </span>
+                )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold">{e.name}</span>
                   <span className="block truncate text-sm text-slate-500 capitalize">
@@ -115,6 +137,21 @@ export default function ExercisePicker({
           ))}
         </ul>
       </div>
+
+      {onPickMany && (
+        <div className="border-t border-slate-200 p-4 dark:border-slate-800">
+          <button
+            type="button"
+            className="btn-primary w-full"
+            disabled={selected.length === 0}
+            onClick={() => onPickMany(selected)}
+          >
+            {selected.length === 0
+              ? 'Select exercises'
+              : `Add ${selected.length} exercise${selected.length > 1 ? 's' : ''}`}
+          </button>
+        </div>
+      )}
     </dialog>
   );
 }

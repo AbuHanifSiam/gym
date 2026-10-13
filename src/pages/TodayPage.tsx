@@ -295,6 +295,18 @@ function Workout({
     setPicker(null);
   }
 
+  function pickMany(list: Exercise[]) {
+    if (list.length === 0) return;
+    const fresh = list.filter((ex) => !known.has(ex.id));
+    if (fresh.length)
+      setPicked((p) => [...p.filter((x) => !fresh.some((f) => f.id === x.id)), ...fresh]);
+    change(
+      (s) => list.reduce((acc, ex) => addEntry(acc, ex), s),
+      list.length === 1 ? `Added ${list[0].name}` : `Added ${list.length} exercises`,
+    );
+    setPicker(null);
+  }
+
   const pickerEl = picker && current && (
     <ExercisePicker
       title={picker.replaceIdx != null ? 'Swap exercise' : 'Add exercise'}
@@ -305,6 +317,7 @@ function Workout({
       }
       inWorkout={new Set(current.entries.map((e) => e.exerciseId))}
       onPick={pick}
+      onPickMany={picker.replaceIdx == null ? pickMany : undefined}
       onClose={() => setPicker(null)}
     />
   );
