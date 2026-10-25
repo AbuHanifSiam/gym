@@ -1,5 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { emptyWeek } from '../../shared/schemas';
+import {
+  emptyWeek,
+  planTemplateKeys,
+  planTemplateNames,
+  type PlanTemplateKey,
+} from '../../shared/schemas';
 import { useActivatePlan, useCreateDefaultPlan, useCreatePlan, usePlans } from '../api/plans';
 
 export default function PlansPage() {
@@ -14,8 +19,8 @@ export default function PlansPage() {
     navigate(`/plan/${plan.id}`);
   }
 
-  async function newDefault() {
-    const { plan } = await createDefault.mutateAsync(undefined);
+  async function newDefault(template: PlanTemplateKey) {
+    const { plan } = await createDefault.mutateAsync(template);
     navigate(`/plan/${plan.id}`);
   }
 
@@ -39,14 +44,19 @@ export default function PlansPage() {
       {plans?.length === 0 && (
         <div className="card space-y-3 text-center">
           <p>You don't have a plan yet.</p>
-          <button
-            type="button"
-            className="btn-primary w-full"
-            onClick={newDefault}
-            disabled={createDefault.isPending}
-          >
-            {createDefault.isPending ? 'Creating…' : 'Load "Beginner Month 1"'}
-          </button>
+          {planTemplateKeys.map((key) => (
+            <button
+              key={key}
+              type="button"
+              className="btn-primary w-full"
+              onClick={() => newDefault(key)}
+              disabled={createDefault.isPending}
+            >
+              {createDefault.isPending && createDefault.variables === key
+                ? 'Creating…'
+                : `Load "${planTemplateNames[key]}"`}
+            </button>
+          ))}
         </div>
       )}
 
@@ -76,15 +86,18 @@ export default function PlansPage() {
       </ul>
 
       {plans && plans.length > 0 && (
-        <div className="pt-2 text-center">
-          <button
-            type="button"
-            className="text-sm font-medium text-emerald-700 dark:text-emerald-400 underline-offset-4 hover:underline"
-            onClick={newDefault}
-            disabled={createDefault.isPending}
-          >
-            Add a fresh copy of "Beginner Month 1"
-          </button>
+        <div className="space-y-2 pt-2 text-center">
+          {planTemplateKeys.map((key) => (
+            <button
+              key={key}
+              type="button"
+              className="block w-full text-sm font-medium text-emerald-700 dark:text-emerald-400 underline-offset-4 hover:underline"
+              onClick={() => newDefault(key)}
+              disabled={createDefault.isPending}
+            >
+              Add a fresh copy of "{planTemplateNames[key]}"
+            </button>
+          ))}
         </div>
       )}
 

@@ -4,6 +4,7 @@ import type {
   PlanInput,
   PlanItem,
   PlanSummary,
+  PlanTemplateKey,
   PublicUser,
   SettingsUpdate,
 } from '../../shared/schemas';
@@ -45,7 +46,9 @@ export const useCreatePlan = () =>
   );
 
 export const useCreateDefaultPlan = () =>
-  usePlanMutation(() => api<{ plan: Plan }>('/plans/default', { method: 'POST' }));
+  usePlanMutation((template: PlanTemplateKey) =>
+    api<{ plan: Plan }>('/plans/default', { method: 'POST', body: { template } }),
+  );
 
 export const useSavePlan = () =>
   usePlanMutation(({ id, input }: { id: string; input: PlanInput }) =>

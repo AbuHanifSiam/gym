@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { orderedDays, planInputSchema, weekdayNames } from '../shared/schemas.js';
 import { seedExercises } from '../server/seed/exercises.js';
-import { buildDefaultPlan } from '../server/seed/plan.js';
+import { buildDefaultPlan, buildPlan, planTemplateDays } from '../server/seed/plan.js';
 
 const fakeIds = new Map(
   seedExercises.map((e, i) => [e.name.toLowerCase(), i.toString(16).padStart(24, '0')]),
@@ -58,6 +58,55 @@ describe('default plan', () => {
       'Day 5',
       'Rest',
     ]);
+  });
+});
+
+describe('dumbbell plan', () => {
+  const plan = planInputSchema.parse(buildPlan('dumbbell', fakeIds));
+  const nameById = new Map([...fakeIds].map(([name, id]) => [id, name]));
+  const day = (dayIndex: number) => plan.days.find((d) => d.dayIndex === dayIndex)!;
+
+  it('only uses exercises from the default library', () => {
+    const known = new Set(seedExercises.map((e) => e.name.toLowerCase()));
+    for (const d of planTemplateDays.dumbbell)
+      for (const i of d.items) expect(known.has(i.exercise.toLowerCase()), i.exercise).toBe(true);
+  });
+
+  it('only uses grips that exist on the exercise', () => {
+    const grips = new Map(
+      seedExercises.map((e) => [
+        e.name.toLowerCase(),
+        new Set((e.variations ?? []).map((v) => v.key)),
+      ]),
+    );
+    for (const d of plan.days)
+      for (const i of d.items)
+        if (i.variationKey)
+          expect(grips.get(nameById.get(i.exerciseId)!)!.has(i.variationKey)).toBe(true);
+  });
+
+  it('rests on Tuesday and Friday and starts every workout with the warm-up walk', () => {
+    const rest = plan.days.filter((d) => d.type === 'rest').map((d) => weekdayNames[d.dayIndex]);
+    expect(rest.sort()).toEqual(['Friday', 'Tuesday']);
+    for (const d of plan.days.filter((d) => d.type === 'train'))
+      expect(nameById.get(d.items[0].exerciseId)).toBe('fast-paced walk');
+  });
+
+  it('puts lat pulldown on Sat/Mon/Thu and seated row on Sun/Mon/Wed', () => {
+    const grip = (dayIndex: number, name: string) =>
+      day(dayIndex).items.find((i) => nameById.get(i.exerciseId) === name)?.variationKey;
+    expect([6, 1, 4].map((d) => grip(d, 'lat pulldown'))).toEqual([
+      'wide-overhand',
+      'underhand',
+      'neutral-v',
+    ]);
+    expect([0, 1, 3].map((d) => grip(d, 'seated cable row'))).toEqual([
+      'v-handle',
+      'wide-bar',
+      'rope',
+    ]);
+    expect(grip(0, 'lat pulldown')).toBeUndefined();
+    expect(grip(4, 'seated cable row')).toBeUndefined();
   });
 });
 

@@ -1,16 +1,19 @@
 import mongoose, { type Types } from 'mongoose';
+import { z } from 'zod';
 import {
   dayItemsSchema,
   planInputSchema,
+  planTemplateKeys,
   type Plan,
   type PlanInput,
   type PlanSummary,
+  type PlanTemplateKey,
 } from '../../shared/schemas.js';
 import { requireUserId } from '../auth.js';
 import { ApiError, parse, type Route } from '../http.js';
 import { ExerciseModel } from '../models/Exercise.js';
 import { PlanModel, type PlanFields } from '../models/Plan.js';
-import { buildDefaultPlan } from '../seed/plan.js';
+import { buildPlan } from '../seed/plan.js';
 import { seedUserExercises } from '../seed/seedUser.js';
 
 export type LeanPlan = PlanFields & { _id: Types.ObjectId };
@@ -76,11 +79,18 @@ async function assertExercisesOwned(userId: string, input: PlanInput) {
   );
 }
 
-/** Creates the default plan for a user (and the default exercises it needs). */
-export async function createDefaultPlan(userId: Types.ObjectId | string, activate: boolean) {
+const templateBodySchema = z.object({ template: z.enum(planTemplateKeys).default('beginner') });
+
+/** Creates a built-in plan for a user (and the default exercises it needs). */
+export async function createDefaultPlan(
+  userId: Types.ObjectId | string,
+  activate: boolean,
+  template: PlanTemplateKey = 'beginner',
+) {
   await seedUserExercises(userId);
   const exercises = await ExerciseModel.find({ userId }, { name: 1 }).lean();
-  const input = buildDefaultPlan(
+  const input = buildPlan(
+    template,
     new Map(exercises.map((e) => [e.name.toLowerCase(), String(e._id)])),
   );
   if (activate) await PlanModel.updateMany({ userId }, { isActive: false });
@@ -122,8 +132,9 @@ export const planRoutes: Route[] = [
     path: '/plans/default',
     handler: async (req, res) => {
       const userId = requireUserId(req);
+      const { template } = parse(templateBodySchema, req.body ?? {});
       const hasActive = await PlanModel.exists({ userId, isActive: true });
-      const doc = await createDefaultPlan(userId, !hasActive);
+      const doc = await createDefaultPlan(userId, !hasActive, template);
       res.status(201).json({ plan: toPlan(doc.toObject() as Lean) });
     },
   },

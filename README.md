@@ -131,23 +131,23 @@ Pushing to `main` deploys automatically. GitHub Actions also runs `npm run check
 
 All routes are under `/api` and return JSON.
 
-| Route                                                           | Methods                | Purpose                                                   |
-| --------------------------------------------------------------- | ---------------------- | --------------------------------------------------------- |
-| `/auth/register`, `/auth/login`, `/auth/logout`                 | POST                   | Account and session                                       |
-| `/auth/me`, `/auth/config`                                      | GET                    | Current user; whether registration is open                |
-| `/settings`                                                     | PUT                    | Update settings (partial)                                 |
-| `/exercises`, `/exercises/:id`                                  | GET, POST, PUT, DELETE | Exercise library (delete is blocked while used in a plan) |
-| `/exercises/seed`                                               | POST                   | Add any missing default exercises                         |
-| `/plans`, `/plans/:id`                                          | GET, POST, PUT, DELETE | Plans                                                     |
-| `/plans/default`, `/plans/:id/activate`, `/plans/:id/duplicate` | POST                   | Default plan, set active, copy                            |
-| `/today?dayIndex=`                                              | GET                    | Plan day, exercises, last numbers, today's workout        |
-| `/sessions?before=`                                             | GET                    | History, 20 per page                                      |
-| `/sessions/:id`                                                 | GET, PUT, DELETE       | One workout; PUT creates or updates (autosave)            |
-| `/progress/exercise/:id`                                        | GET                    | Time series and PRs                                       |
-| `/progress/summary?month=YYYY-MM`                               | GET                    | Calendar, streaks, weekly count                           |
-| `/body`, `/body/:id`                                            | GET, POST, PUT, DELETE | Body log (POST saves the entry for that date)             |
-| `/export`                                                       | GET                    | Download everything as JSON                               |
-| `/health`                                                       | GET                    | Is the database connected                                 |
+| Route                                                           | Methods                | Purpose                                                                    |
+| --------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------- |
+| `/auth/register`, `/auth/login`, `/auth/logout`                 | POST                   | Account and session                                                        |
+| `/auth/me`, `/auth/config`                                      | GET                    | Current user; whether registration is open                                 |
+| `/settings`                                                     | PUT                    | Update settings (partial)                                                  |
+| `/exercises`, `/exercises/:id`                                  | GET, POST, PUT, DELETE | Exercise library (delete is blocked while used in a plan)                  |
+| `/exercises/seed`                                               | POST                   | Add any missing default exercises                                          |
+| `/plans`, `/plans/:id`                                          | GET, POST, PUT, DELETE | Plans                                                                      |
+| `/plans/default`, `/plans/:id/activate`, `/plans/:id/duplicate` | POST                   | Built-in plan (`{ template: "beginner" \| "dumbbell" }`), set active, copy |
+| `/today?dayIndex=`                                              | GET                    | Plan day, exercises, last numbers, today's workout                         |
+| `/sessions?before=`                                             | GET                    | History, 20 per page                                                       |
+| `/sessions/:id`                                                 | GET, PUT, DELETE       | One workout; PUT creates or updates (autosave)                             |
+| `/progress/exercise/:id`                                        | GET                    | Time series and PRs                                                        |
+| `/progress/summary?month=YYYY-MM`                               | GET                    | Calendar, streaks, weekly count                                            |
+| `/body`, `/body/:id`                                            | GET, POST, PUT, DELETE | Body log (POST saves the entry for that date)                              |
+| `/export`                                                       | GET                    | Download everything as JSON                                                |
+| `/health`                                                       | GET                    | Is the database connected                                                  |
 
 ## Troubleshooting
 

@@ -222,6 +222,14 @@ export interface PlanSummary {
   updatedAt: string;
 }
 
+/** Built-in plans anyone can load from the Plans page. */
+export const planTemplateKeys = ['beginner', 'dumbbell'] as const;
+export type PlanTemplateKey = (typeof planTemplateKeys)[number];
+export const planTemplateNames: Record<PlanTemplateKey, string> = {
+  beginner: 'Beginner Month 1',
+  dumbbell: 'Dumbbell Only 5-Day',
+};
+
 /** Days ordered from the user's chosen first weekday. */
 export function orderedDays<T extends { dayIndex: number }>(days: T[], weekStartDay: number): T[] {
   return [...days].sort(
